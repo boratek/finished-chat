@@ -1,0 +1,25 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Auth - Login{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('error') %}
+        <div class="alert alert-error">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+    <h1>Login</h1>
+
+    <form action="{{ path('user_login_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">{{ 'Login'|trans }}</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - User- Profile{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+
+    {% if is_granted('ROLE_USER') %}
+        <a href="{{ path('/logout') }}">Logout</a>
+
+    {% else %}
+        <a href="{{ path('user/login') }}">Login</a>
+
+    {% endif %}
+
+
+
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+
+
+    {% if user|length > 0 %}
+        {% for row in user %}
+            <h1>{{row.login}}</h1>
+            <a href="{{row.login}}/chat">Chat</a>
+            <a href="{{row.login}}/logout">Logout</a>
+        {% endfor %}
+    {% else %}
+        Invalid data.
+    {% endif %}
+
+
+    <h2>Your datas</h2>
+    <p>
+        {% if user|length > 0 %}
+            {% for row in user %}
+                {{row.id}},
+                {{row.name|upper}},
+                {{row.login|e}},
+                {{row.email|e}},
+            {% endfor %}
+        {% else %}
+            Invalid data.
+        {% endif %}
+    </p>
+
+{% endblock %}

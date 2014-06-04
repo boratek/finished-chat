@@ -1,0 +1,24 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - Admin - View{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>User </h1>
+    <p>
+        {% if user|length > 0 %}
+            {% for row in user %}
+                {{ row.id|e}},
+                {{ row.name|upper }},
+                {{ row.email|e }},
+            {% endfor %}
+        {% else %}
+            Invalid data.
+        {% endif %}
+    </p>
+    <a href="{{url('/profile')}}">Return</a>
+{% endblock %}

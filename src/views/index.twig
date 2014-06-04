@@ -1,0 +1,21 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - Silex{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-info">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+    <h1>Home page</h1>
+    <a href="{{ url('/login') }}">Log in</a>
+    <a href="{{ url('/register') }}">Sign in</a>
+{% endblock %}

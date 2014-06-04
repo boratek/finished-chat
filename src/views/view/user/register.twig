@@ -1,0 +1,24 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - User - Sign in{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('error') %}
+        <div class="alert alert-error">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">{{ 'Register'|trans }}</button>
+    </form>
+
+{% endblock %}

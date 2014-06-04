@@ -1,0 +1,28 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - User - Profile{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <script src="../../../js/jquery-1.10.1.min.js"></script>
+    {#<script src="../../../js/utils.js"></script>#}
+    <script src="../../../js/mess.js"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Chat something</h1>
+    <div id="login">{{login}}</div>
+    <div id="chatDiv">
+
+        {% include 'user/display.twig' with {'display_messages': 'display_messages'} %}
+
+    </div>
+
+    <form id="testForm" action="" method="post">
+        {{ form_widget(form) }}
+        <input type="submit" name="submit" id="submit"/>
+    </form>
+
+{% endblock %}

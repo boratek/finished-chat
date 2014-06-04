@@ -1,0 +1,70 @@
+{% extends 'layout.twig' %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('/logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ path('/login') }}">Login</a>
+        {% endif %}
+
+    {% endfor %}
+
+    <h1>List of users</h1>
+
+    {%  if users|length > 0 %}
+
+        <div>
+            {% if paginator.page > 1 %}
+                {% set previous = (paginator.page - 1) %}
+                <a href="{{ url('/users/', {'page': previous}) }}" title="previous page">previous page</a>
+            {%  endif %}
+
+            {% if paginator.page < paginator.pagesCount %}
+                {% set next = (paginator.page + 1) %}
+                <a href="{{ url('/users/', {'page': next}) }}" title="next page">next page</a>
+            {% endif  %}
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id|e }}</td>
+                    <td>{{ user.name|nl2br }}</td>
+                    <td>{{ user.email|nl2br }}</td>
+                    <td>
+                        <a href="{{ url('/user/view', {'id': user.id}) }}" title="View user">View</a>
+                    </td>
+                    <td>
+                        <a href="{{ url('/user/delete', {'id': user.id}) }}" title="Delete user">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            Users not found.
+        </p>
+    {% endif %}
+
+{% endblock %}

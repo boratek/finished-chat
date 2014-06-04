@@ -1,0 +1,16 @@
+{% extends 'layout.twig' %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for row in display_messages %}
+        {{ row.posted_on|nl2br }}
+        {{ row.login|nl2br }}
+        {{ row.message|nl2br }}
+        {{"<br/>"}}
+    {% endfor %}
+
+{% endblock %}
