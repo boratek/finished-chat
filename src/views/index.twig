@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    {% for flashbag in app.session.getFlashBag.get('success') %}
+    {% for flashbag in app.session.getFlashBag.get('info') %}
         <div class="alert alert-info">
             {{ flashbag.title }}
             {{ flashbag.content }}

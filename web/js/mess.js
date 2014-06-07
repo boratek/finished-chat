@@ -3,7 +3,7 @@ $(document).ready(function(){
     var login = $('div#login').text();
 
     var display_url = '../../../../../chat/web/user/profile/' + login + '/display';
-    var chat_url = '../../../../../../chat/web/user/profile/' + login + '/chat';
+    var chat_url =    '../../../../../chat/web/user/profile/' + login + '/chat';
 
     console.log('name: ' + login);
 

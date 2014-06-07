@@ -8,6 +8,12 @@
 
 {% block content %}
 
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('/logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ path('/login') }}">Login</a>
+    {% endif %}
+
     <h1>User </h1>
     <p>
         {% if user|length > 0 %}

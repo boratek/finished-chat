@@ -52,37 +52,37 @@ class UsersModel
         $this->_db = $app['db'];
     }
 
-    /**
-     * Load user by login.
-     *
-     * @access public
-     * @param $login
-     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
-     * @return array User array
-     */
+/**
+ * Load user by login.
+ *
+ * @access public
+ * @param $login
+ * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+ * @return array User array
+ */
 
-    public function loadUserByLogin($login)
-    {
-        $data = $this->getUserByLogin($login);
+public function loadUserByLogin($login)
+{
+    $data = $this->getUserByLogin($login);
 
-        if (!$data) {
-            throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
-        }
-
-        $roles = $this->getUserRoles($data['id']);
-
-        if (!$roles) {
-            throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
-        }
-
-        $user = array(
-            'login' => $data['login'],
-            'password' => $data['password'],
-            'roles' => $roles
-        );
-
-        return $user;
+    if (!$data) {
+throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
     }
+
+    $roles = $this->getUserRoles($data['id']);
+
+    if (!$roles) {
+        throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
+    }
+
+    $user = array(
+        'login' => $data['login'],
+        'password' => $data['password'],
+        'roles' => $roles
+    );
+
+    return $user;
+}
 
     /**
      * Get User by login.
@@ -125,7 +125,7 @@ class UsersModel
         $result = $this->_db->fetchAll($sql, array((string) $userId));
 
         $roles = array();
-        foreach($result as $row) {
+        foreach ($result as $row) {
             $roles[] = $row['role'];
         }
 
@@ -185,11 +185,20 @@ class UsersModel
      * @return array User array
      */
 
-    public function registerUser($data)
+    public function registerUser($data, $app)
     {
-        $sql = "INSERT INTO chat_users (id, name, login, email, password) VALUES (0, ?, ?, ?, ENCRYPT(?))";
+        $password = $app['security.encoder.digest']->encodePassword($data['password'], '');
 
-        $result = $this->_db->executeQuery($sql, array($data['name'], $data['login'], $data['email'], $data['password']));
+        $sql = "INSERT INTO chat_users (id, name, login, email, password) VALUES (0, ?, ?, ?, ?)";
+
+        $result = $this->_db->executeQuery($sql, array($data['name'], $data['login'], $data['email'], $password));
+
+        $id = $this->getUserId($data['login']);
+
+        $sql = "INSERT INTO chat_users_roles (id, user_id, role_id) VALUES (0, ?, ? )";
+
+        $result = $this->_db->executeQuery($sql, array($id, 2));
+
     }
 
     /**
@@ -206,5 +215,12 @@ class UsersModel
         $sql = "SELECT `id`, `name`, `login`, `email` FROM chat_users WHERE login = ? LIMIT 1";
         $result = $this->_db->fetchAll($sql, array((string) $login));
         return $result;
+    }
+
+    public function getUserId($login)
+    {
+        $sql = "SELECT `id` FROM chat_users WHERE login = ? LIMIT 1";
+        $id = $this->_db->fetchAll($sql, array((string) $login));
+        return $id;
     }
 }

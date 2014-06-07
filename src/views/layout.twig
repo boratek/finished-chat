@@ -9,11 +9,11 @@
 </head>
 <body>
 <div id="content">
-    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <a href="{{ path('/logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ path('/login') }}">Login</a>
-    {% endif %}
+    {#{% if is_granted('IS_AUTHENTICATED_FULLY') %}#}
+        {#<a href="{{ path('/logout') }}">Logout</a>#}
+    {#{% else %}#}
+        {#<a href="{{ path('/login') }}">Login</a>#}
+    {#{% endif %}#}
 
     {% block content %}{% endblock %}
 </div>

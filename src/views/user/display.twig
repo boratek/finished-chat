@@ -1,15 +1,14 @@
-{% extends 'layout.twig' %}
-
 {% block head %}
-    {{ parent() }}
+    <link rel="stylesheet" href="{{ app.request.basepath }}/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ app.request.basepath }}/bootstrap/css/chat.css">
 {% endblock %}
 
 {% block content %}
 
     {% for row in display_messages %}
         {{ row.posted_on|nl2br }}
-        {{ row.login|nl2br }}
-        {{ row.message|nl2br }}
+        <span class="login">{{ row.login|nl2br }}</span>
+        <span class="message">{{ row.message|nl2br }}</span>
         {{"<br/>"}}
     {% endfor %}
 

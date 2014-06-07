@@ -21,17 +21,22 @@ $app['debug'] = true;
 //registration of providers
 
 //twig
-$app->register(new Silex\Provider\TwigServiceProvider(), array(
+$app->register(
+    new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => '/home/epi/11_krawczyk/public_html/chat/src/views/',
-));
+    )
+);
 
 //translations
-$app->register(new Silex\Provider\TranslationServiceProvider(), array(
+$app->register(
+    new Silex\Provider\TranslationServiceProvider(), array(
     'locale_fallbacks' => array('en'),
-));
+    )
+);
 
 //db register and config
-$app->register(new Silex\Provider\DoctrineServiceProvider(), array(
+$app->register(
+    new Silex\Provider\DoctrineServiceProvider(), array(
     'dbs.options' => array (
         'mysql_read' => array(
             'driver'    => 'pdo_mysql',
@@ -41,53 +46,80 @@ $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
             'password'  => 'P7s3c6a9f7',
             'charset'   => 'utf8',
         )
-    )));
+    ))
+);
 
 //session
-$app->register(new Silex\Provider\SessionServiceProvider());
+$app->register(
+    new Silex\Provider\SessionServiceProvider()
+);
 
 //do generowanie urli i funkcji path
-$app->register(new Silex\Provider\UrlGeneratorServiceProvider());
-$app->register(new Silex\Provider\FormServiceProvider());
-$app->register(new Silex\Provider\ValidatorServiceProvider());
+$app->register(
+    new Silex\Provider\UrlGeneratorServiceProvider()
+);
+$app->register(
+    new Silex\Provider\FormServiceProvider()
+);
+$app->register(
+    new Silex\Provider\ValidatorServiceProvider()
+);
 
 use User\UserProvider;
 
 //security
-$app->register(new Silex\Provider\SecurityServiceProvider(), array(
-    'security.firewalls' => array(
-//        'main' => array(
-//            'pattern' => '^/',
-//            'anonymous' => true
-//        ),
-        'admin' => array(
-            'pattern' => '^/.*$',
-            'form' => array(
-                'login_path' => '/auth/login',
-                'check_path' => '/user/login_check',
-                'default_target_path'=> '/user/users/1',
-                'username_parameter' => 'form[username]',
-                'password_parameter' => 'form[password]',
-            ),
-            'logout'  => true,
-            'anonymous' => true,
-            'logout' => array('logout_path' => '/auth/logout'),
-            'users' => $app->share(function() use ($app) {
+$app->register(
+    new Silex\Provider\SecurityServiceProvider(), array(
+        'security.firewalls' => array(
+            'admin' => array(
+                'pattern' => '^/.*$',
+                'form' => array(
+                    'login_path' => '/auth/login',
+                    'check_path' => '/auth/check',
+                    'default_target_path'=> '/user/users/1',
+                    'username_parameter' => 'form[username]',
+                    'password_parameter' => 'form[password]',
+                ),
+                'logout'  => true,
+                'anonymous' => true,
+                'logout' => array('logout_path' => '/auth/logout'),
+                'users' => $app->share(
+                    function() use ($app) {
                     return new User\UserProvider($app);
-                }),
+                    }
+                ),
+            ),
+            'default' => array(
+                'pattern' => '^/.*$',
+                'form' => array(
+                    'login_path' => '/auth/login',
+                    'check_path' => '/auth/check',
+                    'default_target_path'=> '/user/profile/{login}/chat',
+                    'username_parameter' => 'form[username]',
+                    'password_parameter' => 'form[password]',
+                ),
+                'logout'  => true,
+                'anonymous' => true,
+                'logout' => array('logout_path' => '/auth/logout'),
+                'users' => $app->share(
+                    function() use ($app) {
+                    return new User\UserProvider($app);
+                    }
+                ),
+            ),
         ),
-    ),
-    'security.access_rules' => array(
-        array('^/.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
-        array('^/auth.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
-        array('^/user/users/.+$', 'ROLE_ADMIN')
-    ),
-    'security.role_hierarchy' => array(
-        'ROLE_ADMIN' => array('ROLE_USER'),
+        'security.access_rules' => array(
+            array('^/index.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
+            array('^/auth/.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
+            array('^/.+$', 'ROLE_ADMIN'),
+            array('^/user/profile/.+$', '^/index.+$', 'ROLE_USER')
+        ),
+        'security.role_hierarchy' => array(
+            'ROLE_ADMIN' => array('ROLE_USER')
+        ),
+    )
+);
 
-    ),
-));
-
-//echo $app['security.encoder.digest']->encodePassword('admin', '');
+//echo $app['security.encoder.digest']->encodePassword('alucha', '');
 
 $app->run();

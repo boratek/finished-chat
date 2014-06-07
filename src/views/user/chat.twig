@@ -12,6 +12,19 @@
 
 {% block content %}
 
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+    {% if is_granted('ROLE_USER') %}
+        <a href="{{ path('/logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ path('/login') }}">Login</a>
+    {% endif %}
+
 <h1>Chat something</h1>
     <div id="login">{{login}}</div>
     <div id="chatDiv">
@@ -22,7 +35,7 @@
 
     <form id="testForm" action="" method="post">
         {{ form_widget(form) }}
-        <input type="submit" name="submit" id="submit"/>
+        <input type="submit" class="btn btn-primary" name="submit" id="submit"/>
     </form>
 
 {% endblock %}

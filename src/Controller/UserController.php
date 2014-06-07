@@ -100,11 +100,14 @@ class UserController implements ControllerProviderInterface
 
         $message= $data['message'];
 
-        $new_message = $app['db']->executeUpdate("INSERT INTO chat (chat_id, posted_on, login, message)
-        VALUES (0, NOW(), '" . $login . "', '" . $message . "')");
+        $newMessage = $app['db']->executeUpdate(
+            "INSERT INTO chat (chat_id, posted_on, login, message) VALUES (0, NOW(), '" . $login . "', '" . $message . "')"
+        );
 
-        return $app['twig']->render('user/chat.twig', array('form' => $form->createView(),
-            'login' => $login));
+        return $app['twig']->render(
+            'user/chat.twig', array('form' => $form->createView(),
+            'login' => $login)
+        );
     }
 
     /**
@@ -120,9 +123,9 @@ class UserController implements ControllerProviderInterface
     {
        // $this->_isLoggedIn($app); // limit access
 
-        $display_messages = $app['db']->fetchAll('SELECT * FROM chat ORDER BY chat_id DESC LIMIT 10');
+        $displayMessages = $app['db']->fetchAll('SELECT * FROM chat ORDER BY chat_id DESC LIMIT 10');
 
-        return $app['twig']->render('user/display.twig', array('display_messages' => $display_messages ));
+        return $app['twig']->render('user/display.twig', array('display_messages' => $displayMessages ));
     }
 
     /**
@@ -137,6 +140,11 @@ class UserController implements ControllerProviderInterface
     public function users(Application $app, Request $request)
     {
         //$this->_isLoggedIn($app); // limit access
+
+        if ($app['security']->isGranted('ROLE_USER')) {
+            $username = $app['security']->getToken()->getUsername();
+            return $app->redirect('../user/profile/' . $username . '/chat');
+        }
 
         $pageLimit = 3;
         $page = (int) $request->get('page', 1);
@@ -181,7 +189,7 @@ class UserController implements ControllerProviderInterface
             ->add('password2', 'password', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
             ->getForm();
 
-        if('POST' == $request->getMethod()){
+        if ('POST' == $request->getMethod()) {
             $form->bind($request);
 
             //$form->handleRequest($request);
@@ -191,17 +199,16 @@ class UserController implements ControllerProviderInterface
 
                 $login = $form->get('login')->getData();
                 $password = $form->get('password')->getData();
-                $password2 = $form->get('password2')->getData();
+                $passwordRepeat = $form->get('password2')->getData();
 
-                if ($password == $password2) {
+                if ($password == $passwordRepeat) {
                     $register = new UsersModel($app);
-                    $new_user = $register->registerUser($data);
+                    $newUser = $register->registerUser($data, $app);
 
                     // redirect to user profile
                     $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'content' => 'You are registered.'));
                     return $app->redirect('profile/' . $login );
-                }
-                else{
+                } else {
                     $app['session']->getFlashBag()->add('error', array('title' => 'FALSE', 'content' => 'Password must be set and must be repeated.'));
                 }
             }
@@ -222,11 +229,11 @@ class UserController implements ControllerProviderInterface
 
     public function delete(Application $app, Request $request)
     {
-        $user_id = (int) $request->get('user_id', 0);
+        $userId = (int) $request->get('user_id', 0);
 
         $userModel = new UsersModel($app);
 
-        $user = $userModel->deleteUser($user_id);
+        $user = $userModel->deleteUser($userId);
 
         $app['session']->getFlashBag()->add('success', array('title' => 'OK', 'content' => 'User has been succesfully deleted.'));
 
@@ -246,11 +253,11 @@ class UserController implements ControllerProviderInterface
     {
        // $this->_isLoggedIn($app); // limit access
 
-        $user_id = (int) $request->get('user_id', 0);
+        $userId = (int) $request->get('user_id', 0);
 
         $userModel = new UsersModel($app);
 
-        $user = $userModel->viewUser($user_id);
+        $user = $userModel->viewUser($userId);
 
         return $app['twig']->render('user/view.twig', array('user' => $user));
     }
