@@ -8,14 +8,14 @@
 
 {% block content %}
 
-    {% for flashbag in app.session.getFlashBag.get('info') %}
-        <div class="alert alert-info">
-            {{ flashbag.title }}
-            {{ flashbag.content }}
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ flashbag.title|trans }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
-    <h1>Home page</h1>
-    <a href="{{ url('/login') }}">Log in</a>
-    <a href="{{ url('/register') }}">Sign in</a>
+    <h1>{{ 'Home page'|trans }}</h1>
+    <a href="{{ url('/login') }}">{{ 'Login'|trans }}</a>
+    <a href="{{ url('/register') }}">{{ 'Signin'|trans }}</a>
 {% endblock %}

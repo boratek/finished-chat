@@ -39,7 +39,7 @@ class IndexController implements ControllerProviderInterface
     public function connect(Application $app)
     {
         $indexController = $app['controllers_factory'];
-        $indexController->get('/', array($this, 'index'))->bind('/index');
+        $indexController->get('/', array($this, 'index'));
         return $indexController;
     }
 
@@ -50,8 +50,6 @@ class IndexController implements ControllerProviderInterface
      * @param \Silex\Application $app
      * @return twig template render
      */
-
-
     public function index(Application $app)
     {
         //root direction

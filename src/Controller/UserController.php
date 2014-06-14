@@ -42,12 +42,15 @@ class UserController implements ControllerProviderInterface
     {
         $userController = $app['controllers_factory'];
         $userController->match('/profile/{login}', array($this, 'index'))->bind('/profile');
+        $userController->match('/profile/{login}/change_data', array($this, 'change_data'))->bind('/change_data');
         $userController->match('/profile/{login}/chat', array($this, 'chat'));
         $userController->match('/profile/{login}/display', array($this, 'display'));
         $userController->match('/register', array($this, 'register'))->bind('/register');
         $userController->get('/users/{page}', array($this, 'users'))->value('page', 1)->bind('/users/');
         $userController->match('/delete/{id}', array($this, 'delete'))->bind('/user/delete');
         $userController->get('/view/{id}', array($this, 'view'))->bind('/user/view');
+        $userController->match('/change_role/{id}', array($this, 'change_role'))->bind('/user/change_role');
+
 
         return $userController;
     }
@@ -63,8 +66,6 @@ class UserController implements ControllerProviderInterface
 
     public function index(Application $app, $login)
     {
-       // $this->_isLoggedIn($app); // limit access
-
         $userModel = new UsersModel($app);
 
         $user = $userModel->getUser($login);
@@ -84,7 +85,6 @@ class UserController implements ControllerProviderInterface
 
     public function chat(Application $app, Request $request, $login)
     {
-        //$this->_isLoggedIn($app); // limit access
 
         $data = array(
             'message' => ''
@@ -121,7 +121,6 @@ class UserController implements ControllerProviderInterface
 
     public function display(Application $app, Request $request)
     {
-       // $this->_isLoggedIn($app); // limit access
 
         $displayMessages = $app['db']->fetchAll('SELECT * FROM chat ORDER BY chat_id DESC LIMIT 10');
 
@@ -139,12 +138,6 @@ class UserController implements ControllerProviderInterface
 
     public function users(Application $app, Request $request)
     {
-        //$this->_isLoggedIn($app); // limit access
-
-        if ($app['security']->isGranted('ROLE_USER')) {
-            $username = $app['security']->getToken()->getUsername();
-            return $app->redirect('../user/profile/' . $username . '/chat');
-        }
 
         $pageLimit = 3;
         $page = (int) $request->get('page', 1);
@@ -158,8 +151,63 @@ class UserController implements ControllerProviderInterface
         $users = $userModel->getUsersPage($page, $pageLimit, $pagesCount);
         $paginator = array('page' => $page, 'pagesCount' => $pagesCount);
 
-        return $app['twig']->render('/user/users.twig', array('users' => $users, 'paginator' => $paginator ));
+        return $app['twig']->render('/user/users.twig', array('users' => $users, 'paginator' => $paginator));
     }
+
+    public function change_role(Application $app, Request $request)
+    {
+        $userId = (int) $request->get('id', 0);
+
+        $form = $app['form.factory']->createBuilder('form')
+            ->add('role', 'choice', array(
+                'choices' => array(1 => 'admin', 2 => 'user'),
+                'expanded' => true,
+            ))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $data = $form->getData();
+
+        $userModel = new UsersModel($app);
+
+        $result = $userModel->changeRole($userId, $data);
+
+        return $app['twig']->render('user/change_role.twig', array('form' => $form->createView()));
+    }
+
+    public function change_data(Application $app, Request $request)
+    {
+        $userLogin = (string)$request->get('login');
+
+        $form = $app['form.factory']->createBuilder('form')
+            ->add('name', 'text', array('constraints' => array(new Assert\Length(array('min' =>5)))))
+            ->add('email', 'text', array('constraints' => new Assert\Email()))
+            ->add('login', 'text', array('constraints' => array(new Assert\Length(array('min' =>5)))))
+            ->add('password', 'password', array('constraints' => array(new Assert\Length(array('min' =>5)))))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if($form->isValid()){
+        $data = $form->getData();
+
+        $userModel = new UsersModel($app);
+
+        $result = $userModel->changeUserData($userLogin, $data, $app);
+
+            if (1 == $result)
+            {
+                $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed your data correctly'));
+            } else {
+                $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+            }
+
+        }
+
+        return $app['twig']->render('user/change_data.twig', array('form' => $form->createView()));
+    }
+
 
     /**
      * register action.
@@ -214,7 +262,7 @@ class UserController implements ControllerProviderInterface
             }
 
         }
-        // display the form
+
         return $app['twig']->render('user/register.twig', array('form' => $form->createView()));
     }
 
@@ -229,7 +277,7 @@ class UserController implements ControllerProviderInterface
 
     public function delete(Application $app, Request $request)
     {
-        $userId = (int) $request->get('user_id', 0);
+        $userId = (int) $request->get('id', 0);
 
         $userModel = new UsersModel($app);
 
@@ -251,9 +299,8 @@ class UserController implements ControllerProviderInterface
 
     public function view(Application $app, Request $request)
     {
-       // $this->_isLoggedIn($app); // limit access
 
-        $userId = (int) $request->get('user_id', 0);
+        $userId = (int) $request->get('id', 0);
 
         $userModel = new UsersModel($app);
 

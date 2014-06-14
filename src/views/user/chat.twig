@@ -5,7 +5,6 @@
 {% block head %}
     {{ parent() }}
     <script src="../../../js/jquery-1.10.1.min.js"></script>
-    {#<script src="../../../js/utils.js"></script>#}
     <script src="../../../js/mess.js"></script>
 
 {% endblock %}
@@ -19,13 +18,10 @@
         </div>
     {% endfor %}
 
-    {% if is_granted('ROLE_USER') %}
-        <a href="{{ path('/logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ path('/login') }}">Login</a>
-    {% endif %}
+    <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+    <a href="../{{login}}">{{ 'Profile'|trans }}</a>
 
-<h1>Chat something</h1>
+<h1>{{ 'Chat something'|trans }}</h1>
     <div id="login">{{login}}</div>
     <div id="chatDiv">
 
@@ -35,7 +31,7 @@
 
     <form id="testForm" action="" method="post">
         {{ form_widget(form) }}
-        <input type="submit" class="btn btn-primary" name="submit" id="submit"/>
+        <input type="submit" class="btn btn-primary" name="submit" id="submit" value="{{ 'Write'|trans }}"/>
     </form>
 
 {% endblock %}

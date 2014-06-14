@@ -1,6 +1,6 @@
 {% extends 'layout.twig' %}
 
-{% block title %}Auth - Login{% endblock %}
+{% block title %}{{ 'Auth'|trans }} - {{ 'Login'|trans }}{% endblock %}
 
 {% block head %}
     {{ parent() }}
@@ -15,7 +15,7 @@
         </div>
     {% endfor %}
 
-    <h1>Login</h1>
+    <h1>{{ 'Login'|trans }}</h1>
 
     <form action="{{ path('auth_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
         {{ form_widget(form) }}

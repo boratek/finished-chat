@@ -68,11 +68,11 @@ class AuthController implements ControllerProviderInterface
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
-                $app['session']->getFlashBag()->add('success', array('title' => 'Ok', 'content' => 'Login is successfull.'));
-        } else {
-                $app['session']->getFlashBag()->add('error', array('title' => 'FALSE', 'content' => 'Login is not successfull. Please try again.'));
-        }
+//        if ($form->isValid()) {
+//                $app['session']->getFlashBag()->add('success', array('title' => 'Ok', 'content' => 'Login is successfull.'));
+//        } else {
+//                $app['session']->getFlashBag()->add('error', array('title' => 'FALSE', 'content' => 'Login is not successfull. Please try again.'));
+//        }
 
          return $app['twig']->render(
              'auth/login.twig', array(
@@ -93,7 +93,9 @@ class AuthController implements ControllerProviderInterface
     public function logout(Application $app, Request $request)
     {
         $app['session']->clear();
-        return $app->redirect('../~11_krawczyk/chat/web/index');
+        $app['session']->getFlashBag()->add('success', array('title' => 'Ok', 'content' => 'You have been succesfully logged out'));
+
+        return $app->redirect($app['url_generator']->generate('/index'), 301);
     }
 
     /**
@@ -110,39 +112,21 @@ class AuthController implements ControllerProviderInterface
         $username = $app['security']->getToken()->getUsername();
         $userRole = $app['security']->isGranted('ROLE_USER');
         $adminRole = $app['security']->isGranted('ROLE_ADMIN');
-        var_dump($username);
-        var_dump('user_role: ' . $userRole);
-        var_dump('admin_role: ' . $adminRole);
 
-        //admin$username = $app['security']->getToken()->getUsername();
-//        $login = $app['security']->getToken();
-//        $admin = $app['security']->isGranted('ROLE_ADMIN');
-//        $user = $app['security']->isGranted('ROLE_USER');
-//        var_dump('user: ' . $user);
-//        var_dump($admin);
-//        var_dump($login);
-//        $username = $login->getUsername();
-//        $login = $login->getRoles();
-//        $password = $login->getPassword();
-//        var_dump($password);
-//        var_dump($login);
-//        var_dump($username);
-//die;
+        if (1 == $adminRole) {
 
-        if ($app['security']->isGranted('ROLE_ADMIN')) {
             $app['session']->getFlashBag()->add('success', array('title' => 'Ok', 'content' => 'Hello, Admin!'));
-            return $app->redirect('../user/users/1');
+            return $app->redirect('../../web/user/users/1');
 
-        } elseif ($app['security']->isGranted('ROLE_USER')) {
+        } elseif (($userRole == 1) && (empty($adminRole))) {
 
             $app['session']->getFlashBag()->add('success', array('title' => 'Ok', 'content' => 'You are successfully logged in.'));
-            return $app->redirect('../user/profile/' . $username . '/chat');
+            return $app->redirect('../../web/user/profile/' . $username . '/chat');
 
         } else {
             $app['session']->getFlashBag()->add('info', array('title' => 'ARG', 'content' => 'You are not allowed to see this page.'));
             return $app->redirect('../../../../~11_krawczyk/chat/web/index');
         }
-
 
     }
 

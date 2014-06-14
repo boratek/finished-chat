@@ -1,0 +1,19 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Auth - Logout{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+    <a href="{{ url('/index') }}">Home page</a>
+{% endblock %}

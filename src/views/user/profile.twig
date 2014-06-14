@@ -1,6 +1,6 @@
 {% extends 'layout.twig' %}
 
-{% block title %}Chat - User- Profile{% endblock %}
+{% block title %}Chat - {{ 'User'|trans }} - {{ 'Profile'|trans }}{% endblock %}
 
 {% block head %}
     {{ parent() }}
@@ -10,10 +10,10 @@
 
 
     {% if is_granted('ROLE_USER') %}
-        <a href="{{ path('/logout') }}">Logout</a>
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
 
     {% else %}
-        <a href="{{ path('/login') }}">Login</a>
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
 
     {% endif %}
 
@@ -31,15 +31,16 @@
     {% if user|length > 0 %}
         {% for row in user %}
             <h1>{{row.login}}</h1>
-            <a href="{{row.login}}/chat">Chat</a>
-            <a href="{{row.login}}/logout">Logout</a>
+            <a href="{{row.login}}/chat">{{ 'Chat'|trans }}</a>
+            <a href="{{row.login}}/logout">{{ 'Logout'|trans }}</a>
+            <a href="{{row.login}}/change_data">{{ 'Change data'|trans }}</a>
         {% endfor %}
     {% else %}
-        Invalid data.
+        {{ 'Invalid data'|trans }}
     {% endif %}
 
 
-    <h2>Your datas</h2>
+    <h2>{{ 'Your data'|trans }}</h2>
     <p>
         {% if user|length > 0 %}
             {% for row in user %}
@@ -49,7 +50,7 @@
                 {{row.email|e}},
             {% endfor %}
         {% else %}
-            Invalid data.
+            {{ 'Invalid data'|trans }}
         {% endif %}
     </p>
 

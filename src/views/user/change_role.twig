@@ -1,0 +1,39 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Chat - Admin - {{ 'Change role'|trans }}{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('/logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ path('/login') }}">Login</a>
+    {% endif %}
+
+    <h1>{{ 'Change role'|trans }}</h1>
+
+    <p>of</p>
+    {#<h2>#}
+        {#{% if user|length > 0 %}#}
+            {#{% for row in user %}#}
+                {#{{row.login|upper}}#}
+            {#{% endfor %}#}
+        {#{% else %}#}
+            {#{{ 'Invalid data'|trans }}#}
+        {#{% endif %}#}
+    {#</h2>#}
+
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">{{ 'Change role'|trans }}</button>
+    </form>
+
+    <a href="{{url('/users/')}}">Return</a>
+{% endblock %}
+
+
+

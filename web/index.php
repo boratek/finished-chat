@@ -65,6 +65,22 @@ $app->register(
     new Silex\Provider\ValidatorServiceProvider()
 );
 
+$app->register(
+        new Silex\Provider\TranslationServiceProvider(), array(
+        'locale_fallbacks' => array('pl'),
+    )
+);
+
+use Symfony\Component\Translation\Loader\YamlFileLoader;
+
+$app['translator'] = $app->share($app->extend('translator', function($translator, $app) {
+    $translator->addLoader('yaml', new YamlFileLoader());
+
+    //$translator->addResource('yaml', __DIR__.'/locales/en.yml', 'en');
+    $translator->addResource('yaml', '/home/epi/11_krawczyk/public_html/chat/src/locales/pl.yml', 'pl');
+    return $translator;
+}));
+
 use User\UserProvider;
 
 //security
@@ -76,7 +92,8 @@ $app->register(
                 'form' => array(
                     'login_path' => '/auth/login',
                     'check_path' => '/auth/check',
-                    'default_target_path'=> '/user/users/1',
+                    'default_target_path' => '/auth/check',
+                   // 'default_target_path'=> '/user/users/1',
                     'username_parameter' => 'form[username]',
                     'password_parameter' => 'form[password]',
                 ),
@@ -94,7 +111,8 @@ $app->register(
                 'form' => array(
                     'login_path' => '/auth/login',
                     'check_path' => '/auth/check',
-                    'default_target_path'=> '/user/profile/{login}/chat',
+                    'default_target_path' => '/auth/check',
+                   // 'default_target_path'=> '/user/profile/{login}/chat',
                     'username_parameter' => 'form[username]',
                     'password_parameter' => 'form[password]',
                 ),
@@ -111,8 +129,8 @@ $app->register(
         'security.access_rules' => array(
             array('^/index.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
             array('^/auth/.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
-            array('^/.+$', 'ROLE_ADMIN'),
-            array('^/user/profile/.+$', '^/index.+$', 'ROLE_USER')
+            array('^/user/users/.+$', 'ROLE_ADMIN'),
+            array('^/user/profile/.+$', 'ROLE_USER')
         ),
         'security.role_hierarchy' => array(
             'ROLE_ADMIN' => array('ROLE_USER')

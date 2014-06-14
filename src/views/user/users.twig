@@ -4,49 +4,45 @@
     {{ parent() }}
 {% endblock %}
 
+{% block title %}Chat - Admin - {{ 'Users'|trans }}{% endblock %}
+
 {% block content %}
 
     {% for flashbag in app.session.getFlashBag.get('success') %}
         <div class="alert alert-success">
-            {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.title|trans }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
-    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <a href="{{ path('/logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ path('/login') }}">Login</a>
-    {% endif %}
-
     {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('/logout') }}">Logout</a>
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
     {% else %}
-        <a href="{{ path('/login') }}">Login</a>
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
 
-    <h1>List of users</h1>
+    <h1>{{ 'List of users'|trans }}</h1>
 
     {%  if users|length > 0 %}
 
         <div>
             {% if paginator.page > 1 %}
                 {% set previous = (paginator.page - 1) %}
-                <a href="{{ url('/users/', {'page': previous}) }}" title="previous page">previous page</a>
+                <a href="{{ url('/users/', {'page': previous}) }}" title="previous page">{{ 'previous page'|trans }}</a>
             {%  endif %}
 
             {% if paginator.page < paginator.pagesCount %}
                 {% set next = (paginator.page + 1) %}
-                <a href="{{ url('/users/', {'page': next}) }}" title="next page">next page</a>
+                <a href="{{ url('/users/', {'page': next}) }}" title="next page">{{ 'next page'|trans }}</a>
             {% endif  %}
         </div>
 
         <table>
             <thead>
             <tr>
-                <th>User ID</th>
-                <th>Username</th>
-                <th>Email</th>
+                <th>{{ 'User ID'|trans }}</th>
+                <th>{{ 'Username'|trans }}</th>
+                <th>{{ 'Email'|trans }}</th>
                 <th colspan="2">&nbsp;</th>
             </tr>
             </thead>
@@ -57,10 +53,13 @@
                     <td>{{ user.name|nl2br }}</td>
                     <td>{{ user.email|nl2br }}</td>
                     <td>
-                        <a href="{{ url('/user/view', {'id': user.id}) }}" title="View user">View</a>
+                        <a href="{{ url('/user/view', {'id': user.id}) }}" title="View user">{{ 'View'|trans }}</a>
                     </td>
                     <td>
-                        <a href="{{ url('/user/delete', {'id': user.id}) }}" title="Delete user">Delete</a>
+                        <a href="{{ url('/user/delete', {'id': user.id}) }}" title="Delete user">{{ 'Delete'|trans }}</a>
+                    </td>
+                    <td>
+                        <a href="{{ url('/user/change_role', {'id': user.id}) }}" title="Change role">{{ 'Change role'|trans }}</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -68,7 +67,7 @@
         </table>
     {% else %}
         <p>
-            Users not found.
+            {{ 'Users not found'|trans }}
         </p>
     {% endif %}
 
