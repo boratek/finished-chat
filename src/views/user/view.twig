@@ -1,6 +1,6 @@
 {% extends 'layout.twig' %}
 
-{% block title %}Chat - Admin - View{% endblock %}
+{% block title %}Chat - Admin - {{ 'View'|trans }}{% endblock %}
 
 {% block head %}
     {{ parent() }}
@@ -9,12 +9,12 @@
 {% block content %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('/logout') }}">Logout</a>
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
     {% else %}
-        <a href="{{ path('/login') }}">Login</a>
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
 
-    <h1>User </h1>
+    <h1>{{ 'User'|trans }}</h1>
     <p>
         {% if user|length > 0 %}
             {% for row in user %}
@@ -26,5 +26,5 @@
             Invalid data.
         {% endif %}
     </p>
-    <a href="{{url('/users/')}}">Return</a>
+    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
 {% endblock %}

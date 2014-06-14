@@ -8,6 +8,12 @@
 
 {% block content %}
 
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
 
     {% if is_granted('ROLE_USER') %}
         <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
@@ -16,17 +22,6 @@
         <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
 
     {% endif %}
-
-
-
-    {% for flashbag in app.session.getFlashBag.get('success') %}
-        <div class="alert alert-success">
-            {{ flashbag.title }}
-            {{ flashbag.content }}
-        </div>
-    {% endfor %}
-
-
 
     {% if user|length > 0 %}
         {% for row in user %}
@@ -38,7 +33,6 @@
     {% else %}
         {{ 'Invalid data'|trans }}
     {% endif %}
-
 
     <h2>{{ 'Your data'|trans }}</h2>
     <p>

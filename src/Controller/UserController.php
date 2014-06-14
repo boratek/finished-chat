@@ -50,6 +50,8 @@ class UserController implements ControllerProviderInterface
         $userController->match('/delete/{id}', array($this, 'delete'))->bind('/user/delete');
         $userController->get('/view/{id}', array($this, 'view'))->bind('/user/view');
         $userController->match('/change_role/{id}', array($this, 'change_role'))->bind('/user/change_role');
+        $userController->match('/show_messages/{id}', array($this, 'show_messages'))->bind('/user/show_messages');
+        $userController->match('/delete_message/{id}', array($this, 'delete_message'))->bind('/user/show_messages/delete_message');
 
         return $userController;
     }
@@ -151,18 +153,29 @@ class UserController implements ControllerProviderInterface
     public function users(Application $app, Request $request)
     {
 
-        $pageLimit = 3;
+        $pageLimit = 5;
         $page = (int) $request->get('page', 1);
-        $userModel = new UsersModel($app);
-        $pagesCount = $userModel->countUsersPages($pageLimit);
 
-        if (($page < 1) || ($page > $pagesCount)) {
-            $page = 1;
+        try {
+
+            $userModel = new UsersModel($app);
+            $pagesCount = $userModel->countUsersPages($pageLimit);
+
+                if ($pagesCount == 0) {
+                    $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                    throw new Exception('ARG#!, there are no pages of users');
+                }
+
+                if (($page < 1) || ($page > $pagesCount)) {
+                    $page = 1;
+                }
+
+            $users = $userModel->getUsersPage($page, $pageLimit, $pagesCount);
+            $paginator = array('page' => $page, 'pagesCount' => $pagesCount);
+
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
         }
-
-        $users = $userModel->getUsersPage($page, $pageLimit, $pagesCount);
-        $paginator = array('page' => $page, 'pagesCount' => $pagesCount);
-
         return $app['twig']->render('/user/users.twig', array('users' => $users, 'paginator' => $paginator));
     }
 
@@ -192,15 +205,15 @@ class UserController implements ControllerProviderInterface
 
         try{
 
-        $result = $userModel->changeRole($userId, $data);
+            $result = $userModel->changeRole($userId, $data);
 
-            if (1 == $result)
-            {
-                $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed user role'));
-            } else {
-                $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
-                throw new Exception('ARG, Surprise, there is some problem with data base');
-            }
+                if (1 == $result)
+                {
+                    $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed user role'));
+                } else {
+                    $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                    throw new Exception('ARG, Surprise, there is some problem with data base');
+                }
         } catch (Exception $e){
             echo $e->getMessage(), "\n";
         }
@@ -241,6 +254,7 @@ class UserController implements ControllerProviderInterface
                         $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed your data correctly'));
                     } else {
                         $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                        throw new Exception('ARG, Surprise, there is some problem with data base');
                     }
 
             } catch (Exception $e) {
@@ -262,21 +276,12 @@ class UserController implements ControllerProviderInterface
      */
     public function register(Application $app, Request $request)
     {
-        // some default data for when the form is displayed the first time
-        $data = array(
-            'name' => 'Your name',
-            'email' => 'Your email',
-            'login' => 'Your nick',
-            'password' => 'Your password',
-            'password2' => 'Rewrite your password'
-        );
 
-        $form = $app['form.factory']->createBuilder('form', $data)
+        $form = $app['form.factory']->createBuilder('form')
             ->add('name', 'text', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
             ->add('email', 'text', array('constraints' => new Assert\Email()))
             ->add('login', 'text', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
             ->add('password', 'password', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
-            ->add('password2', 'password', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
             ->getForm();
 
         if ('POST' == $request->getMethod()) {
@@ -286,23 +291,29 @@ class UserController implements ControllerProviderInterface
 
             if ($form->isValid()) {
                 $data = $form->getData();
-
                 $login = $form->get('login')->getData();
-                $password = $form->get('password')->getData();
-                $passwordRepeat = $form->get('password2')->getData();
+                $register = new UsersModel($app);
 
-                if ($password == $passwordRepeat) {
-                    $register = new UsersModel($app);
-                    $newUser = $register->registerUser($data, $app);
+                    try {
+                        $newUser = $register->registerUser($data, $app);
+                        if (0 == $newUser) {
+                            return $app->redirect('/index');
+                            throw new Exception('ARG#!, there is some problem with registering, please try again later');
+                        } else {
+                            // redirect to user profile
+                            $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'You are registered, please login'));
+                            return $app->redirect('profile/' . $login );
+                        }
 
-                    // redirect to user profile
-                    $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'content' => 'You are registered.'));
-                    return $app->redirect('profile/' . $login );
+                    } catch (Exception $e) {
+                      echo $e->getMessage(), "\n";
+                      $app['session']->getFlashBag()->add('message', array('title' => 'ARGH#!', 'type' => 'error', 'content' => 'Something went wrong with registering'));
+
+                    }
+
                 } else {
-                    $app['session']->getFlashBag()->add('error', array('title' => 'FALSE', 'content' => 'Password must be set and must be repeated.'));
+                    $app['session']->getFlashBag()->add('message', array('title' => 'ARGH#!', 'type' => 'success', 'content' => 'The form is not correct'));
                 }
-            }
-
         }
 
         return $app['twig']->render('user/register.twig', array('form' => $form->createView()));
@@ -322,11 +333,23 @@ class UserController implements ControllerProviderInterface
 
         $userModel = new UsersModel($app);
 
-        $user = $userModel->deleteUser($userId);
+        try {
 
-        $app['session']->getFlashBag()->add('success', array('title' => 'OK', 'content' => 'User has been succesfully deleted.'));
+            $delete = $userModel->deleteUser($userId);
+
+            if (0 == $delete){
+                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'User is not deleted'));
+                throw new Exception('Cannot find the user');
+            } else {
+                  $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'User has been succesfully deleted'));
+            }
+
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
 
         return $app->redirect($app['url_generator']->generate('/users/'), 301);
+
     }
 
     /**
@@ -339,20 +362,86 @@ class UserController implements ControllerProviderInterface
      */
     public function view(Application $app, Request $request)
     {
-
         $userId = (int) $request->get('id', 0);
 
         $userModel = new UsersModel($app);
 
-        $user = $userModel->viewUser($userId);
+        try {
+            $user = $userModel->viewUser($userId);
+
+            if (0 == $user){
+                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Hmm, this user is gone'));
+                throw new Exception('Cannot find the user');
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+
 
         return $app['twig']->render('user/view.twig', array('user' => $user));
     }
 
     /**
+     * Show messages of user
+     *
+     * @param Application $app
+     * @param Request $request
+     * @return mixed
+     */
+    public function show_messages(Application $app, Request $request)
+    {
+        $userId = (int) $request->get('id', 0);
+
+        $userModel = new UsersModel($app);
+
+        try {
+            $messages = $userModel->showUserMessages($userId);
+
+            if (!$messages){
+                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Hmm, this users messages are gone'));
+                throw new Exception('Cannot find the users messages');
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+
+
+        return $app['twig']->render('user/show_messages.twig', array('messages' => $messages));
+    }
+
+    /**
+     * Delete chosen message of user
+     *
+     * @param Application $app
+     * @param Request $request
+     */
+    public function delete_message(Application $app, Request $request)
+    {
+        $messId = (int) $request->get('id', 0);
+
+        $userModel = new UsersModel($app);
+
+        try {
+            $deleteMessage = $userModel->deleteMessage($messId);
+
+            if (!$deleteMessage){
+                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Message is not deleted'));
+                throw new Exception('Cannot find the message');
+            } else {
+                $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'Message has been succesfully deleted'));
+            }
+
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+
+        return $app->redirect($app['url_generator']->generate('/users/'), 301);
+    }
+
+    /**
      * Check if user is logged
      *
-     * @access public
+     * @access protected
      * @param \Silex\Application $app
      * @return twig template render
      */
@@ -362,5 +451,7 @@ class UserController implements ControllerProviderInterface
             return $app->redirect('/auth/login');
         }
     }
+
+
 
 }

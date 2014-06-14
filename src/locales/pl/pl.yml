@@ -21,6 +21,9 @@ Users: Użytkownicy
 Logout: Wyloguj się 
 Home page: Strona główna
 You have been succesfully logged out: Zostałeś poprawnie wylogowany
+
+You are successfully logged in: Witaj, zostałeś poprawne zalogowany
+
 Hello Admin: Cześć Admin
 Users not found: Nie znaleziono użytkowników
 Auth: Autentykacja
@@ -33,4 +36,14 @@ Change role: Zmień uprawnienia
 Change data: Zmień dane
 Change: Zmień
 Write: Pisz
+Register: Zarejestruj się
+
+Show messages: Pokaż wiadomości
+Messages: Wiadomości
+List of messages: Lista wiadomości
+Chat ID: Id wiadomości
+Posted on: Data
+Message: Wiadomość
+Delete message: Usuń wiadomość
+Messages not found: Nie znaleziono wiadomości tego użytkownika
 

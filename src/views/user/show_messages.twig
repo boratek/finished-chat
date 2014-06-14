@@ -1,0 +1,60 @@
+{% extends 'layout.twig' %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block title %}Chat - Admin - {{ 'Messages'|trans }}{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
+        </div>
+    {% endfor %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+    {% else %}
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
+    {% endif %}
+
+    <h1>{{ 'List of messages'|trans }}</h1>
+
+    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
+
+    {%  if messages|length > 0 %}
+
+        <table>
+            <thead>
+            <tr>
+                <th>{{ 'Chat ID'|trans }}</th>
+                <th>{{ 'Posted on'|trans }}</th>
+                <th>{{ 'Login'|trans }}</th>
+                <th>{{ 'Message'|trans }}</th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for message in messages %}
+                <tr>
+                    <td>{{ message.chat_id|e }}</td>
+                    <td>{{ message.posted_on|nl2br }}</td>
+                    <td>{{ message.login|nl2br }}</td>
+                    <td>{{ message.message|nl2br }}</td>
+                    <td>
+                        <a href="{{ url('/user/show_messages/delete_message', {'id': message.chat_id}) }}" title="Delete message">{{ 'Delete message'|trans }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            {{ 'Messages not found'|trans }}
+        </p>
+    {% endif %}
+
+{% endblock %}

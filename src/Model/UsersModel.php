@@ -10,6 +10,7 @@ namespace Model;
 
 use Doctrine\DBAL\DBALException;
 use Silex\Application;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
@@ -257,9 +258,9 @@ class UsersModel
 
         $this->_db->executeQuery($startTransaction);
 
-        $updateRole ='UPDATE chat_users_roles SET role_id = ? WHERE user_id = ?';
+        $updateRole ='UPDATE chat_users_roles SET role_id = ? WHERE user_id = ? LIMIT 1';
 
-        $result = $this->_db->fetchAll($updateRole, array($role, $userId));
+        $result = $this->_db->executeQuery($updateRole, array($role, $userId));
 
         $commitTransaction = "COMMIT";
 
@@ -279,10 +280,17 @@ class UsersModel
      */
     public function changeUserData($userLogin, $data, $app)
     {
+        try {
+            $id = $this->getUserId($userLogin);
 
-        $id = $this->getUserId($userLogin);
+            $id = $id['id'];
 
-        $id = $id['id'];
+                if (!$id) {
+                    throw new Exception(sprintf('Username "%s" does not exist.', $userLogin));
+                }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
 
         $updateQuery = $this->prepareUpdateQuery($data, $id, $app);
 
@@ -333,7 +341,15 @@ class UsersModel
      */
     public function viewUser($userId)
     {
-        $user = $this->getUserById($userId);
+        try {
+            $user = $this->getUserById($userId);
+
+            if (!$user) {
+                throw new Exception(sprintf('Username "%d" does not exist.', $userId));
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
 
         return $user;
     }
@@ -379,10 +395,63 @@ class UsersModel
      */
     public function deleteUser($userId)
     {
-        $sql = 'DELETE FROM chat_users WHERE id = ?';
+        try {
+            $startTransaction = "START TRANSACTION";
 
-        $this->_db->executeQuery($sql, array((int) $userId));
+            $this->_db->executeQuery($startTransaction);
+
+            $sql = 'DELETE FROM chat_users_roles WHERE user_id = ? LIMIT 1';
+
+            $deleteFromUsersRoles = $this->_db->executeQuery($sql, array((int) $userId));
+
+            $sql = 'DELETE FROM chat_users WHERE id = ? LIMIT 1';
+
+            $deleteFromUsers = $this->_db->executeQuery($sql, array((int) $userId));
+
+            $commitTransaction = "COMMIT";
+
+            $this->_db->executeQuery($commitTransaction);
+
+                if ($deleteFromUsers && $deleteFromUsersRoles) {
+                    $result = 1;
+                } else {
+                    $result = 0;
+                    throw new Exception('Problem with database');
+                }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+
+        return $result;
     }
 
+    /**
+     * Show all messages of user
+     *
+     * @param $userId
+     * @return mixed
+     */
+    public function showUserMessages($userId)
+    {
+        $user = $this->getUserById($userId);
 
+        $userLogin = $user[0]['login'];
+
+        $sql = 'SELECT * FROM chat WHERE login = ?';
+        $messages = $this->_db->fetchAll($sql, array((string) $userLogin));
+        return $messages;
+    }
+
+    /**
+     * Delete chosen message
+     *
+     * @param $messId
+     * @return mixed
+     */
+    public function deleteMessage($messId)
+    {
+        $sql = 'DELETE FROM chat WHERE chat_id = ? LIMIT 1';
+        $delete = $this->_db->executeQuery($sql, array((int) $messId));
+        return $delete;
+    }
 }

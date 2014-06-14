@@ -1,6 +1,6 @@
 {% extends 'layout.twig' %}
 
-{% block title %}Chat - User - Sign in{% endblock %}
+{% block title %}Chat - {{ 'User'|trans }} - {{ 'Signin'|trans }}{% endblock %}
 
 {% block head %}
     {{ parent() }}
@@ -8,12 +8,14 @@
 
 {% block content %}
 
-    {% for flashbag in app.session.getFlashBag.get('error') %}
-        <div class="alert alert-error">
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
             {{ flashbag.content }}
         </div>
     {% endfor %}
+
+    <h2>{{ 'Register'|trans }}</h2>
 
     <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
         {{ form_widget(form) }}

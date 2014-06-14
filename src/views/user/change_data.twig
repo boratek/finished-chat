@@ -15,6 +15,12 @@
         </div>
     {% endfor %}
 
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('/logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ path('/login') }}">Login</a>
+    {% endif %}
+
     <h2>{{ 'Change data'|trans }}</h2>
 
     <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">

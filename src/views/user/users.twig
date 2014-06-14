@@ -8,10 +8,10 @@
 
 {% block content %}
 
-    {% for flashbag in app.session.getFlashBag.get('success') %}
-        <div class="alert alert-success">
-            {{ flashbag.title|trans }}
-            {{ flashbag.content|trans }}
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
+            {{ flashbag.title }}
+            {{ flashbag.content }}
         </div>
     {% endfor %}
 
@@ -57,6 +57,9 @@
                     </td>
                     <td>
                         <a href="{{ url('/user/delete', {'id': user.id}) }}" title="Delete user">{{ 'Delete'|trans }}</a>
+                    </td>
+                    <td>
+                        <a href="{{ url('/user/show_messages', {'id': user.id}) }}" title="Show messages">{{ 'Show messages'|trans }}</a>
                     </td>
                     <td>
                         <a href="{{ url('/user/change_role', {'id': user.id}) }}" title="Change role">{{ 'Change role'|trans }}</a>
