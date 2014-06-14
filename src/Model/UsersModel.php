@@ -81,6 +81,30 @@ class UsersModel
     }
 
     /**
+     * Add new message
+     *
+     * @param $login
+     * @param $message
+     * @return mixed
+     */
+    public function addMessage($login, $message)
+    {
+        $sql = 'INSERT INTO chat (chat_id, posted_on, login, message) VALUES (0, NOW(), ?, ?)';
+        return $this->_db->executeQuery($sql, array((string) $login, $message));
+    }
+
+    /**
+     * Display messages
+     *
+     * @return mixed
+     */
+    public function displayMessages()
+    {
+        $sql = 'SELECT * FROM chat ORDER BY chat_id DESC LIMIT 10';
+        return $this->_db->fetchAll($sql);
+    }
+
+    /**
      * Get User by login.
      *
      * @access public
@@ -140,7 +164,7 @@ class UsersModel
         $sql = 'SELECT COUNT(*) as pages_count FROM chat_users';
         $result = $this->_db->fetchAssoc($sql);
         if ($result) {
-            $pagesCount =  ceil($result['pages_count']/$limit);
+            $pagesCount = ceil($result['pages_count']/$limit);
         }
         return $pagesCount;
     }

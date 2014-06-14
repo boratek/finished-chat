@@ -10,6 +10,7 @@ namespace Controller;
 
 use Silex\Application;
 use Silex\ControllerProviderInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -31,13 +32,12 @@ class UserController implements ControllerProviderInterface
 {
 
     /**
-     * connect.
+     * connect
      *
      * @access public
      * @param \Silex\Application $app
      * @return object controller
      */
-
     public function connect(Application $app)
     {
         $userController = $app['controllers_factory'];
@@ -51,7 +51,6 @@ class UserController implements ControllerProviderInterface
         $userController->get('/view/{id}', array($this, 'view'))->bind('/user/view');
         $userController->match('/change_role/{id}', array($this, 'change_role'))->bind('/user/change_role');
 
-
         return $userController;
     }
 
@@ -63,7 +62,6 @@ class UserController implements ControllerProviderInterface
      * @param $login
      * @return twig template render
      */
-
     public function index(Application $app, $login)
     {
         $userModel = new UsersModel($app);
@@ -82,10 +80,8 @@ class UserController implements ControllerProviderInterface
      * @param $login
      * @return twig template render
      */
-
     public function chat(Application $app, Request $request, $login)
     {
-
         $data = array(
             'message' => ''
         );
@@ -100,9 +96,17 @@ class UserController implements ControllerProviderInterface
 
         $message= $data['message'];
 
-        $newMessage = $app['db']->executeUpdate(
-            "INSERT INTO chat (chat_id, posted_on, login, message) VALUES (0, NOW(), '" . $login . "', '" . $message . "')"
-        );
+        try {
+        $userModel = new UsersModel($app);
+        $result = $userModel->addMessage($login, $message);
+
+            if(0 == $result){
+                throw new Exception('ARG, something went wrong with saving message. Please try later');
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+            return $app->redirect('profile/' . $login );
+        }
 
         return $app['twig']->render(
             'user/chat.twig', array('form' => $form->createView(),
@@ -118,11 +122,20 @@ class UserController implements ControllerProviderInterface
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return twig template render
      */
-
     public function display(Application $app, Request $request)
     {
+        $userModel = new UsersModel($app);
 
-        $displayMessages = $app['db']->fetchAll('SELECT * FROM chat ORDER BY chat_id DESC LIMIT 10');
+        try{
+            $displayMessages = $userModel->displayMessages();
+
+                if ($displayMessages == 0)
+                {
+                    throw new Exception('ARG#!, Something went wrong with displaying messages. Please come back later');
+                }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
 
         return $app['twig']->render('user/display.twig', array('display_messages' => $displayMessages ));
     }
@@ -135,7 +148,6 @@ class UserController implements ControllerProviderInterface
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return twig template render
      */
-
     public function users(Application $app, Request $request)
     {
 
@@ -154,6 +166,13 @@ class UserController implements ControllerProviderInterface
         return $app['twig']->render('/user/users.twig', array('users' => $users, 'paginator' => $paginator));
     }
 
+    /**
+     * Change user role
+     *
+     * @param Application $app
+     * @param Request $request
+     * @return mixed
+     */
     public function change_role(Application $app, Request $request)
     {
         $userId = (int) $request->get('id', 0);
@@ -171,11 +190,30 @@ class UserController implements ControllerProviderInterface
 
         $userModel = new UsersModel($app);
 
+        try{
+
         $result = $userModel->changeRole($userId, $data);
 
+            if (1 == $result)
+            {
+                $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed user role'));
+            } else {
+                $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                throw new Exception('ARG, Surprise, there is some problem with data base');
+            }
+        } catch (Exception $e){
+            echo $e->getMessage(), "\n";
+        }
         return $app['twig']->render('user/change_role.twig', array('form' => $form->createView()));
     }
 
+    /**
+     * Change user data
+     *
+     * @param Application $app
+     * @param Request $request
+     * @return mixed
+     */
     public function change_data(Application $app, Request $request)
     {
         $userLogin = (string)$request->get('login');
@@ -194,13 +232,19 @@ class UserController implements ControllerProviderInterface
 
         $userModel = new UsersModel($app);
 
-        $result = $userModel->changeUserData($userLogin, $data, $app);
+            try {
 
-            if (1 == $result)
-            {
-                $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed your data correctly'));
-            } else {
-                $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                $result = $userModel->changeUserData($userLogin, $data, $app);
+
+                    if (1 == $result)
+                    {
+                        $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed your data correctly'));
+                    } else {
+                        $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                    }
+
+            } catch (Exception $e) {
+                echo $e->getMessage(), "\n";
             }
 
         }
@@ -208,16 +252,14 @@ class UserController implements ControllerProviderInterface
         return $app['twig']->render('user/change_data.twig', array('form' => $form->createView()));
     }
 
-
     /**
-     * register action.
+     * Register of user
      *
      * @access public
      * @param \Silex\Application $app
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return twig template render
      */
-
     public function register(Application $app, Request $request)
     {
         // some default data for when the form is displayed the first time
@@ -267,14 +309,13 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * delete action.
+     * Delete user
      *
      * @access public
      * @param \Silex\Application $app
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return twig template render
      */
-
     public function delete(Application $app, Request $request)
     {
         $userId = (int) $request->get('id', 0);
@@ -289,14 +330,13 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * view action.
+     * View user
      *
      * @access public
      * @param \Silex\Application $app
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return twig template render
      */
-
     public function view(Application $app, Request $request)
     {
 
@@ -310,13 +350,12 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * check if user is logged.
+     * Check if user is logged
      *
      * @access public
      * @param \Silex\Application $app
      * @return twig template render
      */
-
     protected function _isLoggedIn(Application $app)
     {
         if (null === $user = $app['session']->get('user')) {
