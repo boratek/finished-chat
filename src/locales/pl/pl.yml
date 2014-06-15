@@ -12,7 +12,7 @@ Delete: Usuń
 Return: Wróć
 User: Użytkownik
 User ID: Id Użytkownika
-Username: Login
+Username: Nazwa użytkownika
 Email: Adres email
 next page: następne
 previous page: poprzednie
@@ -21,8 +21,9 @@ Users: Użytkownicy
 Logout: Wyloguj się 
 Home page: Strona główna
 You have been succesfully logged out: Zostałeś poprawnie wylogowany
+Role: Rola
 
-You are successfully logged in: Witaj, zostałeś poprawne zalogowany
+You are successfully logged in: Zostałeś poprawnie zalogowany
 
 Hello Admin: Cześć Admin
 Users not found: Nie znaleziono użytkowników
@@ -47,3 +48,16 @@ Message: Wiadomość
 Delete message: Usuń wiadomość
 Messages not found: Nie znaleziono wiadomości tego użytkownika
 
+This value should not be blank.: To pole nie może być puste
+The form is not correct: Proszę, popraw formularz
+Something went wrong with registering: Coś poszło nie tak z rejestracją, spróbuj później
+You are registered, please login: Zostałeś zarejestrowany, zaloguj się
+Surprise, Hudson, we have some problem: A to niespodzianka, Hudson, mamy problem
+You have changed user role: Zmieniłeś rolę użytkownika
+You have changed your data correctly: Zmieniłeś swoje dane, jak chciałeś
+User is not deleted: Użytkownik dalej się trzyma
+User has been succesfully deleted: Udało się usunąć użytkownika
+Hmm, this user is gone: Hmm, nie ma kogoś takiego
+Hmm, this users messages are gone: Hmm, nie ma wiadomości od tego użytkownika
+Message is not deleted: Nie udało się usunąć wiadomości
+Message has been succesfully deleted: Udało się usunąć wiadomość

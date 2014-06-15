@@ -55,7 +55,8 @@ class UserProvider implements UserProviderInterface
      *
      * @access public
      * @param $login
-     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     * @throws
+     *      \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      * @return object User
      */
 
@@ -63,7 +64,12 @@ class UserProvider implements UserProviderInterface
     {
         $userModel = new UsersModel($this->_app);
         $user = $userModel->loadUserByLogin($login);
-        return new User($user['login'], $user['password'], $user['roles'], true, true, true, true);
+        return new User(
+            $user['login'],
+            $user['password'],
+            $user['roles'],
+            true, true, true, true
+        );
     }
 
     /**
@@ -71,14 +77,19 @@ class UserProvider implements UserProviderInterface
      *
      * @access public
      * @param \Symfony\Component\Security\Core\User\UserInterface $user
-     * @throws \Symfony\Component\Security\Core\Exception\UnsupportedUserException
+     * @throws
+     *      \Symfony\Component\Security\Core\Exception\UnsupportedUserException
      * @return array User array
      */
 
     public function refreshUser(UserInterface $user)
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
+            throw new UnsupportedUserException(
+                sprintf(
+                    'Instances of "%s" are not supported.', get_class($user)
+                )
+            );
         }
         return $this->loadUserByUsername($user->getUsername());
     }

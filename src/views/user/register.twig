@@ -11,11 +11,13 @@
     {% for flashbag in app.session.getFlashBag.get('message') %}
         <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
     <h2>{{ 'Register'|trans }}</h2>
+
+    <a href="{{url('/index')}}">{{ 'Return'|trans }}</a>
 
     <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
         {{ form_widget(form) }}

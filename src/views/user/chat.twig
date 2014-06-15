@@ -14,7 +14,7 @@
     {% for flashbag in app.session.getFlashBag.get('message') %}
         <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 

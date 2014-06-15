@@ -55,7 +55,8 @@ class UsersModel
      *
      * @access public
      * @param $login
-     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     * @throws
+     *      \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      * @return array User array
      */
     public function loadUserByLogin($login)
@@ -63,13 +64,17 @@ class UsersModel
         $data = $this->getUserByLogin($login);
 
         if (!$data) {
-            throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
+            throw new UsernameNotFoundException(
+                sprintf('Username "%s" does not exist.', $login)
+            );
         }
 
         $roles = $this->getUserRoles($data['id']);
 
         if (!$roles) {
-            throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $login));
+            throw new UsernameNotFoundException(
+                sprintf('Username "%s" does not exist.', $login)
+            );
         }
 
         $user = array(
@@ -90,7 +95,8 @@ class UsersModel
      */
     public function addMessage($login, $message)
     {
-        $sql = 'INSERT INTO chat (chat_id, posted_on, login, message) VALUES (0, NOW(), ?, ?)';
+        $sql = 'INSERT INTO chat (chat_id, posted_on, login, message)
+                VALUES (0, NOW(), ?, ?)';
         return $this->_db->executeQuery($sql, array((string) $login, $message));
     }
 
@@ -110,7 +116,8 @@ class UsersModel
      *
      * @access public
      * @param $login
-     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     * @throws
+     *      \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      * @return array User data array
      */
     public function getUserByLogin($login)
@@ -185,7 +192,17 @@ class UsersModel
         if (($page <= 1) || ($page > $pagesCount)) {
             $page = 1;
         }
-        $sql = 'SELECT `id`, `name`, `email` FROM chat_users WHERE id > 1 LIMIT :start, :limit';
+        $sql = 'SELECT u.id, u.name, u.email, u.login, r.role_id
+                FROM chat_users u, chat_users_roles r
+                WHERE u.id <> 1
+                AND u.id = r.user_id LIMIT :start, :limit';
+        /*$sql = 'SELECT u.id, u.name, u.login, u.email, r.role_id
+                FROM chat_users u, chat_users_roles r
+                WHERE r.role_id = 2
+                AND u.id = r.user_id
+                LIMIT :start, :limit';
+        */
+
         $statement = $this->_db->prepare($sql);
         $statement->bindValue('start', ($page-1)*$limit, \PDO::PARAM_INT);
         $statement->bindValue('limit', $limit, \PDO::PARAM_INT);
@@ -204,28 +221,61 @@ class UsersModel
      */
     public function registerUser($data, $app)
     {
-        $password = $app['security.encoder.digest']->encodePassword($data['password'], '');
+        try{
+            $password = $app['security.encoder.digest']->encodePassword(
+                $data['password'], ''
+            );
 
-       $startTransaction = "START TRANSACTION";
+            $startTransaction = "START TRANSACTION";
 
-       $this->_db->executeQuery($startTransaction);
+            $startingTheTransaction = $this->_db
+                ->executeQuery($startTransaction);
 
-       $insertIntoChatUsers = "INSERT INTO chat_users (id, name, login, email, password) VALUES (0, ?, ?, ?, ?)";
+            $insertIntoChatUsers =
+                'INSERT INTO chat_users (id, name, login, email, password)
+                 VALUES (0, ?, ?, ?, ?)';
 
-        $this->_db->executeQuery($insertIntoChatUsers, array($data['name'], $data['login'], $data['email'], $password));
+            $insertingUser = $this->_db
+                ->executeQuery(
+                    $insertIntoChatUsers, array(
+                    $data['name'],
+                    $data['login'],
+                    $data['email'],
+                    $password
+                    )
+                );
 
-       $selectLatestId = "SELECT @user_id := max(id) FROM chat_users";
+            $selectLatestId = 'SELECT @user_id := max(id) FROM chat_users';
 
-        $this->_db->executeQuery($selectLatestId);
+            $findLatestUserId = $this->_db->executeQuery($selectLatestId);
 
-       $insertIntoUsersRoles = "INSERT INTO chat_users_roles(id, user_id, role_id) VALUES (0, @user_id, 2)";
+            $insertIntoUsersRoles =
+                'INSERT INTO chat_users_roles(id, user_id, role_id)
+                 VALUES (0, @user_id, 2)';
 
-        $this->_db->executeQuery($insertIntoUsersRoles);
+            $insertingRole = $this->_db->executeQuery($insertIntoUsersRoles);
 
-       $commitTransaction = "COMMIT";
+            $commitTransaction = "COMMIT";
 
-        $this->_db->executeQuery($commitTransaction);
+            $endOfTransaction = $this->_db->executeQuery($commitTransaction);
 
+            if ((!$startingTheTransaction)
+                && (!$insertingUser)
+                && (!$findLatestUserId)
+                && (!$insertingRole)
+                && (!$endOfTransaction)) {
+
+                throw new Exception('Problem with registering user');
+
+                $result = 0;
+            } else {
+                $result = 1;
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage(); "\n";
+        }
+
+        return $result;
     }
 
     /**
@@ -233,12 +283,15 @@ class UsersModel
      *
      * @access public
      * @param $login
-     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     * @throws
+     *      \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      * @return array User array
      */
     public function getUser($login)
     {
-        $sql = "SELECT `id`, `name`, `login`, `email` FROM chat_users WHERE login = ? LIMIT 1";
+        $sql = 'SELECT id, name, login, email
+                FROM chat_users
+                WHERE login = ? LIMIT 1';
         $result = $this->_db->fetchAll($sql, array((string) $login));
         return $result;
     }
@@ -251,21 +304,32 @@ class UsersModel
     public function changeRole($userId, $data)
     {
         $role = $data['role'];
-        var_dump($role);
-        var_dump($userId);
 
-        $startTransaction = "START TRANSACTION";
+        try {
+            $startTransaction = "START TRANSACTION";
 
-        $this->_db->executeQuery($startTransaction);
+            $this->_db->executeQuery($startTransaction);
 
-        $updateRole ='UPDATE chat_users_roles SET role_id = ? WHERE user_id = ? LIMIT 1';
+            $updateRole ='UPDATE chat_users_roles
+                          SET role_id = ?
+                          WHERE user_id = ? LIMIT 1';
 
-        $result = $this->_db->executeQuery($updateRole, array($role, $userId));
+            $result = $this->_db
+                ->executeQuery($updateRole, array($role, $userId));
 
-        $commitTransaction = "COMMIT";
+            $commitTransaction = "COMMIT";
 
-        $this->_db->executeQuery($commitTransaction);
+            $this->_db->executeQuery($commitTransaction);
 
+                if (!$result) {
+                    throw new Exception('Problem with changing user role');
+                    $result = 0;
+                } else {
+                    $result = 1;
+                }
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
         return $result;
     }
 
@@ -286,7 +350,9 @@ class UsersModel
             $id = $id['id'];
 
                 if (!$id) {
-                    throw new Exception(sprintf('Username "%s" does not exist.', $userLogin));
+                    throw new Exception(
+                        sprintf('Username "%s" does not exist.', $userLogin)
+                    );
                 }
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
@@ -312,13 +378,11 @@ class UsersModel
 
         $updateQuery = 'UPDATE chat_users SET ';
 
-        foreach ($data as $item => $value)
-        {
-            if ($value != '')
-            {
-                if ($item == 'password')
-                {
-                    $value = $app['security.encoder.digest']->encodePassword($value, '');
+        foreach ($data as $item => $value) {
+            if ($value != '') {
+                if ($item == 'password') {
+                    $value = $app['security.encoder.digest']
+                        ->encodePassword($value, '');
                 }
 
                 $updateQuery = $updateQuery . $item . ' = \'' . $value . '\', ';
@@ -345,7 +409,9 @@ class UsersModel
             $user = $this->getUserById($userId);
 
             if (!$user) {
-                throw new Exception(sprintf('Username "%d" does not exist.', $userId));
+                throw new Exception(
+                    sprintf('Username "%d" does not exist.', $userId)
+                );
             }
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
@@ -364,7 +430,9 @@ class UsersModel
      */
     public function getUserById($userId)
     {
-        $sql = 'SELECT id, name, login, email FROM chat_users WHERE id = ? LIMIT 1';
+        $sql = 'SELECT id, name, login, email
+                FROM chat_users
+                WHERE id = ? LIMIT 1';
 
         return $this->_db->fetchAll($sql, array((int) $userId));
     }
@@ -402,11 +470,13 @@ class UsersModel
 
             $sql = 'DELETE FROM chat_users_roles WHERE user_id = ? LIMIT 1';
 
-            $deleteFromUsersRoles = $this->_db->executeQuery($sql, array((int) $userId));
+            $deleteFromUsersRoles = $this->_db
+                ->executeQuery($sql, array((int) $userId));
 
             $sql = 'DELETE FROM chat_users WHERE id = ? LIMIT 1';
 
-            $deleteFromUsers = $this->_db->executeQuery($sql, array((int) $userId));
+            $deleteFromUsers = $this->_db
+                ->executeQuery($sql, array((int) $userId));
 
             $commitTransaction = "COMMIT";
 

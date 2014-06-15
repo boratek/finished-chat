@@ -41,17 +41,47 @@ class UserController implements ControllerProviderInterface
     public function connect(Application $app)
     {
         $userController = $app['controllers_factory'];
-        $userController->match('/profile/{login}', array($this, 'index'))->bind('/profile');
-        $userController->match('/profile/{login}/change_data', array($this, 'change_data'))->bind('/change_data');
+        $userController->match(
+            '/profile/{login}', array(
+                $this, 'index')
+        )->bind('/profile');
+        $userController->match(
+            '/profile/{login}/change_data', array(
+                $this, 'change_data')
+        )->bind('/change_data');
         $userController->match('/profile/{login}/chat', array($this, 'chat'));
-        $userController->match('/profile/{login}/display', array($this, 'display'));
-        $userController->match('/register', array($this, 'register'))->bind('/register');
-        $userController->get('/users/{page}', array($this, 'users'))->value('page', 1)->bind('/users/');
-        $userController->match('/delete/{id}', array($this, 'delete'))->bind('/user/delete');
-        $userController->get('/view/{id}', array($this, 'view'))->bind('/user/view');
-        $userController->match('/change_role/{id}', array($this, 'change_role'))->bind('/user/change_role');
-        $userController->match('/show_messages/{id}', array($this, 'show_messages'))->bind('/user/show_messages');
-        $userController->match('/delete_message/{id}', array($this, 'delete_message'))->bind('/user/show_messages/delete_message');
+        $userController->match(
+            '/profile/{login}/display', array(
+            $this, 'display')
+        );
+        $userController->match(
+            '/register', array(
+                $this, 'register')
+        )->bind('/register');
+        $userController->get(
+            '/users/{page}', array(
+                $this, 'users')
+        )->value('page', 1)->bind('/users/');
+        $userController->match(
+            '/delete/{id}', array(
+                $this, 'delete')
+        )->bind('/user/delete');
+        $userController->get(
+            '/view/{id}', array(
+                $this, 'view')
+        )->bind('/user/view');
+        $userController->match(
+            '/change_role/{id}', array(
+                $this, 'change_role')
+        )->bind('/user/change_role');
+        $userController->match(
+            '/show_messages/{id}', array(
+                $this, 'show_messages')
+        )->bind('/user/show_messages');
+        $userController->match(
+            '/delete_message/{id}', array(
+                $this, 'delete_message')
+        )->bind('/user/show_messages/delete_message');
 
         return $userController;
     }
@@ -70,7 +100,11 @@ class UserController implements ControllerProviderInterface
 
         $user = $userModel->getUser($login);
 
-        return $app['twig']->render('user/profile.twig', array('user' => $user ));
+        return $app['twig']->render(
+            'user/profile.twig', array(
+                'user' => $user
+            )
+        );
     }
 
     /**
@@ -84,11 +118,8 @@ class UserController implements ControllerProviderInterface
      */
     public function chat(Application $app, Request $request, $login)
     {
-        $data = array(
-            'message' => ''
-        );
 
-        $form = $app['form.factory']->createBuilder('form', $data)
+        $form = $app['form.factory']->createBuilder('form')
             ->add('message', 'text')
             ->getForm();
 
@@ -102,12 +133,16 @@ class UserController implements ControllerProviderInterface
         $userModel = new UsersModel($app);
         $result = $userModel->addMessage($login, $message);
 
-            if(0 == $result){
-                throw new Exception('ARG, something went wrong with saving message. Please try later');
+            if (!$result) {
+                throw new Exception(
+                    'ARG,
+                    something went wrong with saving message.
+                    Please try later'
+                );
             }
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
-            return $app->redirect('profile/' . $login );
+            return $app->redirect('profile/' . $login);
         }
 
         return $app['twig']->render(
@@ -131,15 +166,22 @@ class UserController implements ControllerProviderInterface
         try{
             $displayMessages = $userModel->displayMessages();
 
-                if ($displayMessages == 0)
-                {
-                    throw new Exception('ARG#!, Something went wrong with displaying messages. Please come back later');
+                if (!$displayMessages) {
+                    throw new Exception(
+                        'ARG#!,
+                        Something went wrong with displaying messages.
+                        Please come back later'
+                    );
                 }
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
         }
 
-        return $app['twig']->render('user/display.twig', array('display_messages' => $displayMessages ));
+        return $app['twig']->render(
+            'user/display.twig', array(
+                'display_messages' => $displayMessages
+            )
+        );
     }
 
     /**
@@ -162,7 +204,15 @@ class UserController implements ControllerProviderInterface
             $pagesCount = $userModel->countUsersPages($pageLimit);
 
                 if ($pagesCount == 0) {
-                    $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
+                    $app['session']->getFlashBag()->add(
+                        'message', array(
+                            'type' => 'error',
+                            'title' => 'ARG#!',
+                            'content' =>
+                                'Surprise, Hudson, we have some problem'
+                        )
+                    );
+
                     throw new Exception('ARG#!, there are no pages of users');
                 }
 
@@ -176,7 +226,12 @@ class UserController implements ControllerProviderInterface
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
         }
-        return $app['twig']->render('/user/users.twig', array('users' => $users, 'paginator' => $paginator));
+        return $app['twig']->render(
+            '/user/users.twig', array(
+                'users' => $users,
+                'paginator' => $paginator
+            )
+        );
     }
 
     /**
@@ -191,10 +246,12 @@ class UserController implements ControllerProviderInterface
         $userId = (int) $request->get('id', 0);
 
         $form = $app['form.factory']->createBuilder('form')
-            ->add('role', 'choice', array(
+            ->add(
+                'role', 'choice', array(
                 'choices' => array(1 => 'admin', 2 => 'user'),
                 'expanded' => true,
-            ))
+                )
+            )
             ->getForm();
 
         $form->handleRequest($request);
@@ -203,21 +260,44 @@ class UserController implements ControllerProviderInterface
 
         $userModel = new UsersModel($app);
 
-        try{
+        if ($form->isValid()) {
 
-            $result = $userModel->changeRole($userId, $data);
+            try{
 
-                if (1 == $result)
-                {
-                    $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed user role'));
-                } else {
-                    $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
-                    throw new Exception('ARG, Surprise, there is some problem with data base');
-                }
-        } catch (Exception $e){
-            echo $e->getMessage(), "\n";
+                $result = $userModel->changeRole($userId, $data);
+
+                    if (!$result) {
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'type' => 'error',
+                                'title' => 'ARG#!',
+                                'content' =>
+                                    'Surprise, Hudson, there is some problem'
+                            )
+                        );
+
+                        throw new Exception(
+                            'ARG, Surprise,
+                            there is some problem with data base'
+                        );
+
+                    } else {
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'type' => 'success',
+                                'title' => 'OK',
+                                'content' => 'You have changed user role')
+                        );
+                    }
+            } catch (Exception $e) {
+                echo $e->getMessage(), "\n";
+            }
         }
-        return $app['twig']->render('user/change_role.twig', array('form' => $form->createView()));
+        return $app['twig']->render(
+            'user/change_role.twig', array(
+                'form' => $form->createView()
+            )
+        );
     }
 
     /**
@@ -232,15 +312,37 @@ class UserController implements ControllerProviderInterface
         $userLogin = (string)$request->get('login');
 
         $form = $app['form.factory']->createBuilder('form')
-            ->add('name', 'text', array('constraints' => array(new Assert\Length(array('min' =>5)))))
-            ->add('email', 'text', array('constraints' => new Assert\Email()))
-            ->add('login', 'text', array('constraints' => array(new Assert\Length(array('min' =>5)))))
-            ->add('password', 'password', array('constraints' => array(new Assert\Length(array('min' =>5)))))
+            ->add(
+                'name', 'text', array(
+                    'constraints' => array(
+                        new Assert\Length(array('min' =>5))
+                    )
+                )
+            )
+            ->add(
+                'email', 'text', array(
+                    'constraints' => new Assert\Email()
+                )
+            )
+            ->add(
+                'login', 'text', array(
+                    'constraints' => array(
+                        new Assert\Length(array('min' =>5))
+                    )
+                )
+            )
+            ->add(
+                'password', 'password', array(
+                    'constraints' => array(
+                        new Assert\Length(array('min' =>5))
+                    )
+                )
+            )
             ->getForm();
 
         $form->handleRequest($request);
 
-        if($form->isValid()){
+        if ($form->isValid()) {
         $data = $form->getData();
 
         $userModel = new UsersModel($app);
@@ -249,12 +351,30 @@ class UserController implements ControllerProviderInterface
 
                 $result = $userModel->changeUserData($userLogin, $data, $app);
 
-                    if (1 == $result)
-                    {
-                        $app['session']->getFlashBag()->add('message', array('type' => 'success', 'title' => 'OK', 'content' => 'You have changed your data correctly'));
+                    if (1 == $result) {
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'type' => 'success',
+                                'title' => 'OK',
+                                'content' =>
+                                    'You have changed your data correctly')
+                        );
+
+                       return $app->redirect($app['url_generator']->generate('/login'), 301);
+
                     } else {
-                        $app['session']->getFlashBag()->add('message', array('type' => 'error', 'title' => 'ARG', 'content' => 'Surprise, there is some problem'));
-                        throw new Exception('ARG, Surprise, there is some problem with data base');
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'type' => 'error',
+                                'title' => 'ARG#!',
+                                'content' =>
+                                    'Surprise, Hudson, there is some problem')
+                        );
+
+                        throw new Exception(
+                            'ARG, Surprise,
+                            there is some problem with data base'
+                        );
                     }
 
             } catch (Exception $e) {
@@ -263,7 +383,10 @@ class UserController implements ControllerProviderInterface
 
         }
 
-        return $app['twig']->render('user/change_data.twig', array('form' => $form->createView()));
+        return $app['twig']->render(
+            'user/change_data.twig', array(
+                'form' => $form->createView())
+        );
     }
 
     /**
@@ -278,11 +401,32 @@ class UserController implements ControllerProviderInterface
     {
 
         $form = $app['form.factory']->createBuilder('form')
-            ->add('name', 'text', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
-            ->add('email', 'text', array('constraints' => new Assert\Email()))
-            ->add('login', 'text', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
-            ->add('password', 'password', array('constraints' => array(new Assert\NotBlank(), new Assert\Length(array('min' =>5)))))
-            ->getForm();
+
+        ->add(
+            'name', 'text', array('constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Length(array('min' =>5))
+                )
+            )
+        )
+        ->add(
+            'email', 'text', array('constraints' => new Assert\Email())
+        )
+        ->add(
+            'login', 'text', array('constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Length(array('min' =>5))
+                )
+            )
+        )
+        ->add(
+            'password', 'password', array('constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Length(array('min' =>5))
+                )
+            )
+        )
+        ->getForm();
 
         if ('POST' == $request->getMethod()) {
             $form->bind($request);
@@ -292,31 +436,64 @@ class UserController implements ControllerProviderInterface
             if ($form->isValid()) {
                 $data = $form->getData();
                 $login = $form->get('login')->getData();
-                $register = new UsersModel($app);
+                $newUser = new UsersModel($app);
 
                     try {
-                        $newUser = $register->registerUser($data, $app);
-                        if (0 == $newUser) {
-                            return $app->redirect('/index');
-                            throw new Exception('ARG#!, there is some problem with registering, please try again later');
+                        $register = $newUser->registerUser($data, $app);
+
+                        if (!$register) {
+                            $app['session']->getFlashBag()->add(
+                                'message', array(
+                                    'title' => 'ARGH#!',
+                                    'type' => 'error',
+                                    'content' =>
+                                        'Something went wrong with registering')
+                            );
+
+                           throw new Exception(
+                               'ARG#!,
+                               there is some problem with registering,
+                               please try again later'
+                           );
+
                         } else {
                             // redirect to user profile
-                            $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'You are registered, please login'));
-                            return $app->redirect('profile/' . $login );
+                            $app['session']->getFlashBag()->add(
+                                'message', array(
+                                    'title' => 'OK',
+                                    'type' => 'success',
+                                    'content' =>
+                                        'You are registered, please login')
+                            );
+                            return $app->redirect('profile/' . $login);
                         }
 
                     } catch (Exception $e) {
                       echo $e->getMessage(), "\n";
-                      $app['session']->getFlashBag()->add('message', array('title' => 'ARGH#!', 'type' => 'error', 'content' => 'Something went wrong with registering'));
+                      $app['session']->getFlashBag()->add(
+                          'message', array(
+                            'title' => 'ARGH#!',
+                            'type' => 'error',
+                            'content' =>
+                                'Something went wrong with registering')
+                      );
 
                     }
 
-                } else {
-                    $app['session']->getFlashBag()->add('message', array('title' => 'ARGH#!', 'type' => 'success', 'content' => 'The form is not correct'));
-                }
+            } else {
+                    $app['session']->getFlashBag()->add(
+                        'message', array(
+                            'title' => 'ARGH#!',
+                            'type' => 'success',
+                            'content' => 'The form is not correct')
+                    );
+            }
         }
 
-        return $app['twig']->render('user/register.twig', array('form' => $form->createView()));
+        return $app['twig']->render(
+            'user/register.twig', array(
+                'form' => $form->createView())
+        );
     }
 
     /**
@@ -337,11 +514,22 @@ class UserController implements ControllerProviderInterface
 
             $delete = $userModel->deleteUser($userId);
 
-            if (0 == $delete){
-                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'User is not deleted'));
+            if (0 == $delete) {
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                        'title' => 'ARG#!',
+                        'type' => 'error',
+                        'content' => 'User is not deleted')
+                );
+
                 throw new Exception('Cannot find the user');
             } else {
-                  $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'User has been succesfully deleted'));
+                  $app['session']->getFlashBag()->add(
+                      'message', array(
+                        'title' => 'OK',
+                        'type' => 'success',
+                        'content' => 'User has been succesfully deleted')
+                  );
             }
 
         } catch (Exception $e) {
@@ -369,8 +557,14 @@ class UserController implements ControllerProviderInterface
         try {
             $user = $userModel->viewUser($userId);
 
-            if (0 == $user){
-                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Hmm, this user is gone'));
+            if (0 == $user) {
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                        'title' => 'ARG#!',
+                        'type' => 'error',
+                        'content' => 'Hmm, this user is gone')
+                );
+
                 throw new Exception('Cannot find the user');
             }
         } catch (Exception $e) {
@@ -397,8 +591,14 @@ class UserController implements ControllerProviderInterface
         try {
             $messages = $userModel->showUserMessages($userId);
 
-            if (!$messages){
-                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Hmm, this users messages are gone'));
+            if (!$messages) {
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                        'title' => 'ARG#!',
+                        'type' => 'error',
+                        'content' => 'Hmm, this users messages are gone')
+                );
+
                 throw new Exception('Cannot find the users messages');
             }
         } catch (Exception $e) {
@@ -406,7 +606,10 @@ class UserController implements ControllerProviderInterface
         }
 
 
-        return $app['twig']->render('user/show_messages.twig', array('messages' => $messages));
+        return $app['twig']->render(
+            'user/show_messages.twig', array(
+                'messages' => $messages)
+        );
     }
 
     /**
@@ -424,11 +627,23 @@ class UserController implements ControllerProviderInterface
         try {
             $deleteMessage = $userModel->deleteMessage($messId);
 
-            if (!$deleteMessage){
-                $app['session']->getFlashBag()->add('message', array('title' => 'ARG#!', 'type' => 'error', 'content' => 'Message is not deleted'));
+            if (!$deleteMessage) {
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                        'title' => 'ARG#!',
+                        'type' => 'error',
+                        'content' => 'Message is not deleted')
+                );
+
                 throw new Exception('Cannot find the message');
             } else {
-                $app['session']->getFlashBag()->add('message', array('title' => 'OK', 'type' => 'success', 'content' => 'Message has been succesfully deleted'));
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                                'title' => 'OK',
+                                'type' => 'success',
+                                'content' =>
+                                    'Message has been succesfully deleted')
+                );
             }
 
         } catch (Exception $e) {

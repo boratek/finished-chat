@@ -11,14 +11,14 @@
     {% for flashbag in app.session.getFlashBag.get('message') %}
         <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('/logout') }}">Logout</a>
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
     {% else %}
-        <a href="{{ path('/login') }}">Login</a>
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
 
     <h1>{{ 'Change role'|trans }}</h1>
@@ -28,7 +28,7 @@
         <button type="submit" class="btn btn-primary">{{ 'Change role'|trans }}</button>
     </form>
 
-    <a href="{{url('/users/')}}">Return</a>
+    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
 {% endblock %}
 
 

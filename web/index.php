@@ -23,7 +23,7 @@ $app['debug'] = true;
 //twig
 $app->register(
     new Silex\Provider\TwigServiceProvider(), array(
-    'twig.path' => '/home/epi/11_krawczyk/public_html/chat/src/views/',
+    'twig.path' => __DIR__ . '/../src/views/',
     )
 );
 
@@ -66,20 +66,48 @@ $app->register(
 );
 
 $app->register(
-        new Silex\Provider\TranslationServiceProvider(), array(
+    new Silex\Provider\TranslationServiceProvider(), array(
         'locale_fallbacks' => array('pl'),
     )
 );
 
+//translator
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
-$app['translator'] = $app->share($app->extend('translator', function($translator, $app) {
-    $translator->addLoader('yaml', new YamlFileLoader());
+$app['translator'] = $app->share(
+    $app->extend(
+        'translator', function($translator, $app)
+        {
+        $translator->addLoader('yaml', new YamlFileLoader());
 
-    //$translator->addResource('yaml', __DIR__.'/locales/en.yml', 'en');
-    $translator->addResource('yaml', '/home/epi/11_krawczyk/public_html/chat/src/locales/pl.yml', 'pl');
-    return $translator;
-}));
+        $translator->addResource(
+            'yaml', __DIR__ . '/../src/locales/pl/pl.yml', 'pl'
+        );
+        return $translator;
+        }
+    )
+);
+
+$lang = "pl";
+if ($app['session']->get('current_language')) {
+    $lang = $app['session']->get('current_language');
+}
+
+foreach (glob(__DIR__ . '/locales/'. $lang . '/*.yml') as $locale) {
+    $app['translator']->addResource('yaml', $locale, $lang);
+}
+
+/* sets current language */
+$app['translator']->setLocale($lang);
+
+$app['translator.domains'] = array(
+    'validators' => array(
+        'pl' => array(
+            'This value should not be blank.' =>
+                'To pole nie może być puste.',
+        ),
+    ),
+);
 
 use User\UserProvider;
 
@@ -93,7 +121,6 @@ $app->register(
                     'login_path' => '/auth/login',
                     'check_path' => '/auth/check',
                     'default_target_path' => '/auth/check',
-                   // 'default_target_path'=> '/user/users/1',
                     'username_parameter' => 'form[username]',
                     'password_parameter' => 'form[password]',
                 ),
@@ -112,7 +139,6 @@ $app->register(
                     'login_path' => '/auth/login',
                     'check_path' => '/auth/check',
                     'default_target_path' => '/auth/check',
-                   // 'default_target_path'=> '/user/profile/{login}/chat',
                     'username_parameter' => 'form[username]',
                     'password_parameter' => 'form[password]',
                 ),
@@ -138,6 +164,6 @@ $app->register(
     )
 );
 
-//echo $app['security.encoder.digest']->encodePassword('alucha', '');
+//echo $app['security.encoder.digest']->encodePassword('bart', '');
 
 $app->run();

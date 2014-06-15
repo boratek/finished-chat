@@ -11,19 +11,19 @@
     {% for flashbag in app.session.getFlashBag.get('message') %}
         <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
-    {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('/logout') }}">Logout</a>
+    {% if is_granted('ROLE_USER') %}
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
     {% else %}
-        <a href="{{ path('/login') }}">Login</a>
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
 
     <h2>{{ 'Change data'|trans }}</h2>
 
-    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="change_form">
         {{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">{{ 'Change'|trans }}</button>
     </form>

@@ -11,7 +11,7 @@
     {% for flashbag in app.session.getFlashBag.get('message') %}
         <div class="alert alert-{{ flashbag.type }}">
             {{ flashbag.title }}
-            {{ flashbag.content }}
+            {{ flashbag.content|trans }}
         </div>
     {% endfor %}
 
@@ -42,7 +42,9 @@
             <tr>
                 <th>{{ 'User ID'|trans }}</th>
                 <th>{{ 'Username'|trans }}</th>
+                <th>{{ 'Login'|trans }}</th>
                 <th>{{ 'Email'|trans }}</th>
+                <th>{{ 'Role'|trans }}</th>
                 <th colspan="2">&nbsp;</th>
             </tr>
             </thead>
@@ -51,7 +53,9 @@
                 <tr>
                     <td>{{ user.id|e }}</td>
                     <td>{{ user.name|nl2br }}</td>
+                    <td>{{ user.login|nl2br }}</td>
                     <td>{{ user.email|nl2br }}</td>
+                    <td>{{ user.role_id|nl2br }}</td>
                     <td>
                         <a href="{{ url('/user/view', {'id': user.id}) }}" title="View user">{{ 'View'|trans }}</a>
                     </td>

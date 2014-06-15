@@ -8,9 +8,9 @@
 
 {% block content %}
 
-    {% for flashbag in app.session.getFlashBag.get('success') %}
-        <div class="alert alert-success">
-            {{ flashbag.title|trans }}
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
+            {{ flashbag.title }}
             {{ flashbag.content|trans }}
         </div>
     {% endfor %}
