@@ -35,9 +35,15 @@ div#content{
     margin: -15% 0 0 -25%;
 }
 
-form#login_form, form#change_form{
+form#login_form{
     position: relative;
     left: 28%;
+}
+
+form#change_form, form#register_form{
+    position: relative;
+    left: 28%;
+    top: 15%;
 }
 
 .btn-primary{

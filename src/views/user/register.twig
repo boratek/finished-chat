@@ -15,11 +15,11 @@
         </div>
     {% endfor %}
 
+    <p class="return"><a href="{{url('/index')}}">{{ 'Return'|trans }}</a></p>
+
     <h2>{{ 'Register'|trans }}</h2>
 
-    <a href="{{url('/index')}}">{{ 'Return'|trans }}</a>
-
-    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="register_form">
         {{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">{{ 'Register'|trans }}</button>
     </form>

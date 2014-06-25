@@ -102,7 +102,8 @@ class UserController implements ControllerProviderInterface
 
         return $app['twig']->render(
             'user/profile.twig', array(
-                'user' => $user
+                'user' => $user,
+                'login' => $login
             )
         );
     }
@@ -119,7 +120,7 @@ class UserController implements ControllerProviderInterface
     public function chat(Application $app, Request $request, $login)
     {
 
-        $form = $app['form.factory']->createBuilder('form')
+        $form = $app['form.factory']->createBuilder('form', null, array('csrf_protection' => false))
             ->add('message', 'text')
             ->getForm();
 
@@ -245,11 +246,41 @@ class UserController implements ControllerProviderInterface
     {
         $userId = (int) $request->get('id', 0);
 
+        $currentUser = new UsersModel($app);
+        $currentUser = $currentUser->getUserById($userId);
+
+        if (!$currentUser) {
+            $app['session']->getFlashBag()->add(
+                'message', array(
+                    'type' => 'error',
+                    'title' => 'ARG#!',
+                    'content' =>
+                        'Nice try, but user with these id does not exist'
+                )
+            );
+
+            return $app->redirect($app['url_generator']->generate('/users/'), 301);
+        }
+
+        $userCurrentRole = $currentUser[0]['role_id'];
+        $login = $currentUser[0]['login'];
+        $roleToChoice = array();
+
+        if ($userCurrentRole == 1) {
+            $roleToChoice[2] = 'User';
+            $userCurrentRoleName = 'Admin';
+        } else {
+            $roleToChoice[1] = 'Admin';
+            $userCurrentRoleName = 'User';
+        }
+
         $form = $app['form.factory']->createBuilder('form')
             ->add(
                 'role', 'choice', array(
-                'choices' => array(1 => 'admin', 2 => 'user'),
-                'expanded' => true,
+                'choices' => $roleToChoice,
+                'required'    => false,
+                'empty_value' => $userCurrentRoleName,
+                'empty_data'  => null,
                 )
             )
             ->getForm();
@@ -261,6 +292,19 @@ class UserController implements ControllerProviderInterface
         $userModel = new UsersModel($app);
 
         if ($form->isValid()) {
+
+            if ($data['role'] == null) {
+                $data['role'] = $userCurrentRole;
+
+                $app['session']->getFlashBag()->add(
+                    'message', array(
+                        'type' => 'info',
+                        'title' => 'HEY',
+                        'content' => 'You have not changed user role')
+                );
+
+                return $app->redirect($app['url_generator']->generate('/users/'), 301);
+            }
 
             try{
 
@@ -288,6 +332,8 @@ class UserController implements ControllerProviderInterface
                                 'title' => 'OK',
                                 'content' => 'You have changed user role')
                         );
+
+                        return $app->redirect($app['url_generator']->generate('/users/'), 301);
                     }
             } catch (Exception $e) {
                 echo $e->getMessage(), "\n";
@@ -295,7 +341,9 @@ class UserController implements ControllerProviderInterface
         }
         return $app['twig']->render(
             'user/change_role.twig', array(
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'userCurrentRoleName' => $userCurrentRoleName,
+                'login' => $login
             )
         );
     }
@@ -311,22 +359,30 @@ class UserController implements ControllerProviderInterface
     {
         $userLogin = (string)$request->get('login');
 
-        $form = $app['form.factory']->createBuilder('form')
+        $user = new UsersModel($app);
+        $userExistingData = $user->getUserByLogin($userLogin);
+
+        $form = $app['form.factory']->createBuilder('form', $userExistingData)
             ->add(
                 'name', 'text', array(
                     'constraints' => array(
+                        new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
             )
             ->add(
                 'email', 'text', array(
-                    'constraints' => new Assert\Email()
+                    'constraints' => array(
+                        new Assert\NotBlank(),
+                        new Assert\Email()
+                    )
                 )
             )
             ->add(
                 'login', 'text', array(
                     'constraints' => array(
+                        new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -334,6 +390,7 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'password', 'password', array(
                     'constraints' => array(
+                        new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -343,14 +400,16 @@ class UserController implements ControllerProviderInterface
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-        $data = $form->getData();
+            $data = $form->getData();
 
-        $userModel = new UsersModel($app);
+            $data = $this->compareData($data, $userExistingData);
+
+            $userModel = new UsersModel($app);
 
             try {
 
                 $result = $userModel->changeUserData($userLogin, $data, $app);
-
+                    var_dump($result);
                     if (1 == $result) {
                         $app['session']->getFlashBag()->add(
                             'message', array(
@@ -385,7 +444,8 @@ class UserController implements ControllerProviderInterface
 
         return $app['twig']->render(
             'user/change_data.twig', array(
-                'form' => $form->createView())
+                'form' => $form->createView(),
+            )
         );
     }
 
@@ -403,17 +463,17 @@ class UserController implements ControllerProviderInterface
         $form = $app['form.factory']->createBuilder('form')
 
         ->add(
-            'name', 'text', array('constraints' => array(
+            'name', 'text', array('label' => 'Username', 'constraints' => array(
                     new Assert\NotBlank(),
                     new Assert\Length(array('min' =>5))
                 )
             )
         )
         ->add(
-            'email', 'text', array('constraints' => new Assert\Email())
+            'email', 'text', array('label' => 'Email', 'constraints' => new Assert\Email())
         )
         ->add(
-            'login', 'text', array('constraints' => array(
+            'login', 'text', array('label' => 'Login', 'constraints' => array(
                     new Assert\NotBlank(),
                     new Assert\Length(array('min' =>5))
                 )
@@ -425,6 +485,9 @@ class UserController implements ControllerProviderInterface
                     new Assert\Length(array('min' =>5))
                 )
             )
+        )
+        ->add(
+            'password_repeat', 'password'
         )
         ->getForm();
 
@@ -438,6 +501,9 @@ class UserController implements ControllerProviderInterface
                 $login = $form->get('login')->getData();
                 $newUser = new UsersModel($app);
 
+                $checkPassword = $this->checkPassword($data, $app);
+
+                if ($checkPassword) {
                     try {
                         $register = $newUser->registerUser($data, $app);
 
@@ -480,13 +546,14 @@ class UserController implements ControllerProviderInterface
 
                     }
 
-            } else {
+                } else {
                     $app['session']->getFlashBag()->add(
                         'message', array(
                             'title' => 'ARGH#!',
-                            'type' => 'success',
-                            'content' => 'The form is not correct')
+                            'type' => 'error',
+                            'content' => 'The password must be repeated')
                     );
+                }
             }
         }
 
@@ -507,6 +574,22 @@ class UserController implements ControllerProviderInterface
     public function delete(Application $app, Request $request)
     {
         $userId = (int) $request->get('id', 0);
+
+        $currentUser = new UsersModel($app);
+        $currentUser = $currentUser->getUserById($userId);
+
+        if (!$currentUser) {
+            $app['session']->getFlashBag()->add(
+                'message', array(
+                    'type' => 'error',
+                    'title' => 'ARG#!',
+                    'content' =>
+                        'Nice try, but user with these id does not exist'
+                )
+            );
+
+            return $app->redirect($app['url_generator']->generate('/users/'), 301);
+        }
 
         $userModel = new UsersModel($app);
 
@@ -556,7 +639,6 @@ class UserController implements ControllerProviderInterface
 
         try {
             $user = $userModel->viewUser($userId);
-
             if (0 == $user) {
                 $app['session']->getFlashBag()->add(
                     'message', array(
@@ -668,5 +750,26 @@ class UserController implements ControllerProviderInterface
     }
 
 
+    protected function compareData($data, $userExistingData)
+    {
+        $compare = array_diff($data, $userExistingData);
 
+        foreach ($compare as $key => $compared) {
+            if ($compared == null) {
+                unset($data[$key]);
+            }
+        }
+
+        return $data;
+    }
+
+
+    protected function checkPassword($data, $app)
+    {
+        if ($data['password'] != $data['password_repeat']) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
 }

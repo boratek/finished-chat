@@ -15,7 +15,9 @@
         </div>
     {% endfor %}
 
-    <h1>{{ 'Login'|trans }}</h1>
+    <p class="return"><a href="{{url('/index')}}">{{ 'Return'|trans }}</a></p>
+
+    <h1>{{ 'Log_in'|trans }}</h1>
 
     <form action="{{ path('auth_check') }}" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="login_form">
         {{ form_widget(form) }}

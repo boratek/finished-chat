@@ -1,7 +1,7 @@
 success: udało się
 info: informacja
 false: nie udało się
-Login: Zaloguj się
+Log_in: Zaloguj się
 login: Login
 Name: Imię
 Password: Hasło
@@ -61,3 +61,9 @@ Hmm, this user is gone: Hmm, nie ma kogoś takiego
 Hmm, this users messages are gone: Hmm, nie ma wiadomości od tego użytkownika
 Message is not deleted: Nie udało się usunąć wiadomości
 Message has been succesfully deleted: Udało się usunąć wiadomość
+Nice try, but user with these id does not exist: Użytkownik o tym id nei istnieje
+
+of User:: Użytkownika
+current role:: Aktualne uprawnienia
+
+You have not changed user role: Nie zmieniłeś uprawnień

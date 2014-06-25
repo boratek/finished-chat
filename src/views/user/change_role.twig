@@ -17,18 +17,40 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+        <p>Jesteś zalogowany jako Admin</p>
     {% else %}
         <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
-
+    <p class="return"><a href="{{url('/users/')}}">{{ 'Return'|trans }}</a></p>
     <h1>{{ 'Change role'|trans }}</h1>
+        <h3>{{ 'of User:'|trans }}</h3>
+        <p>{{ login }}</p>
+        <h3>{{ 'current role:'|trans }}</h3>
+        <p>{{ userCurrentRoleName }}</p>
 
-    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3">
+
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="change_form">
+
+        {#{% if userCurrentRole == 1 %}#}
+        {#<input id="form_role_0" type="radio" value="1" required="required" name="form[role]" checked>#}
+        {#{% else %}#}
+        {#<input id="form_role_0" type="radio" value="1" required="required" name="form[role]">#}
+        {#{% endif %}#}
+        {#<label class="required" for="form_role_0">admin</label>#}
+
+        {#{% if userCurrentRole == 2 %}#}
+        {#<input id="form_role_1" type="radio" value="2" required="required" name="form[role]" checked>#}
+        {#{% else %}#}
+        {#<input id="form_role_1" type="radio" value="2" required="required" name="form[role]">#}
+        {#{% endif %}#}
+        {#<label class="required" for="form_role_1">user</label>#}
+
+
         {{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">{{ 'Change role'|trans }}</button>
     </form>
 
-    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
+
 {% endblock %}
 
 
