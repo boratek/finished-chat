@@ -370,7 +370,6 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'name', 'text', array(
                     'constraints' => array(
-                //        new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -378,7 +377,6 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'email', 'text', array(
                     'constraints' => array(
-            //            new Assert\NotBlank(),
                         new Assert\Email()
                     )
                 )
@@ -386,7 +384,6 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'login', 'text', array(
                     'constraints' => array(
-           //             new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -394,7 +391,6 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'password', 'password', array(
                     'constraints' => array(
-            //            new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -559,7 +555,6 @@ class UserController implements ControllerProviderInterface
                             'content' =>
                                 'Something went wrong with registering')
                       );
-
                     }
 
                 } else {
