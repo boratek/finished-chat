@@ -196,12 +196,6 @@ class UsersModel
                 FROM chat_users u, chat_users_roles r
                 WHERE u.id <> 1
                 AND u.id = r.user_id LIMIT :start, :limit';
-        /*$sql = 'SELECT u.id, u.name, u.login, u.email, r.role_id
-                FROM chat_users u, chat_users_roles r
-                WHERE r.role_id = 2
-                AND u.id = r.user_id
-                LIMIT :start, :limit';
-        */
 
         $statement = $this->_db->prepare($sql);
         $statement->bindValue('start', ($page-1)*$limit, \PDO::PARAM_INT);
@@ -375,7 +369,6 @@ class UsersModel
      */
     public function prepareUpdateQuery($data, $id, $app)
     {
-
         $updateQuery = 'UPDATE chat_users SET ';
 
         foreach ($data as $item => $value) {
@@ -416,7 +409,6 @@ class UsersModel
         } catch (Exception $e) {
             echo $e->getMessage(), "\n";
         }
-
         return $user;
     }
 
@@ -430,10 +422,18 @@ class UsersModel
      */
     public function getUserById($userId)
     {
-        $sql = 'SELECT id, name, login, email
-                FROM chat_users
-                WHERE id = ? LIMIT 1';
+//        $sql = 'SELECT id, name, login, email
+//                FROM chat_users
+//                WHERE id = ? LIMIT 1';
 
+        $sql = 'SELECT u.id, u.name, u.login, u.email, r.role_id
+                FROM chat_users u, chat_users_roles r
+                WHERE u.id = ?
+                AND u.id = r.user_id
+                LIMIT 1';
+
+//było fetchAssoc, ale jeżeli jest fetchAssoc to nei działa viewAction
+        //jeżeli jest fetchAll to trzeba używać póżniej np $login = $currentUser[0]['login']
         return $this->_db->fetchAll($sql, array((int) $userId));
     }
 
@@ -523,5 +523,22 @@ class UsersModel
         $sql = 'DELETE FROM chat WHERE chat_id = ? LIMIT 1';
         $delete = $this->_db->executeQuery($sql, array((int) $messId));
         return $delete;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMessagesDates()
+    {
+        $sql = 'SELECT posted_on FROM chat';
+
+        return $this->_db->fetchAll($sql);
+    }
+
+    public function selectAllMessagesByDate($data)
+    {
+        $sql = 'SELECT * FROM chat WHERE posted_on = ?';
+
+        return $this->_db->fetchAll($sql, array($data['date']));
     }
 }

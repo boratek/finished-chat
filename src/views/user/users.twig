@@ -17,10 +17,11 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+        <p>Jesteś zalogowany jako Admin</p>
     {% else %}
         <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
-
+    <p><a href={{ url('/user/show_all_messages')}}>{{ 'All messages'|trans }}</a></p>
     <h1>{{ 'List of users'|trans }}</h1>
 
     {%  if users|length > 0 %}

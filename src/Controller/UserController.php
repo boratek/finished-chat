@@ -82,6 +82,14 @@ class UserController implements ControllerProviderInterface
             '/delete_message/{id}', array(
                 $this, 'delete_message')
         )->bind('/user/show_messages/delete_message');
+        $userController->match(
+            '/show_all_messages', array(
+                $this, 'show_all_messages')
+        )->bind('/user/show_all_messages');
+        $userController->match(
+            '/display_chosen_messages', array(
+                $this, 'display_chosen_messages')
+        )->bind('/user/display_chosen_messages');
 
         return $userController;
     }
@@ -409,7 +417,7 @@ class UserController implements ControllerProviderInterface
             try {
 
                 $result = $userModel->changeUserData($userLogin, $data, $app);
-                var_dump($result);
+
                     if (1 == $result) {
                         $app['session']->getFlashBag()->add(
                             'message', array(
@@ -421,13 +429,24 @@ class UserController implements ControllerProviderInterface
 
                        return $app->redirect($app['url_generator']->generate('/login'), 301);
 
+                    } elseif (0 == $result) {
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'type' => 'info',
+                                'title' => 'HEY',
+                                'content' =>
+                                    'You have not changed your data')
+                        );
+
                     } else {
+
                         $app['session']->getFlashBag()->add(
                             'message', array(
                                 'type' => 'error',
                                 'title' => 'ARG#!',
                                 'content' =>
-                                    'Surprise, Hudson, there is some problem')
+                                    'Surprise,
+                            there is some problem with data base')
                         );
 
                         throw new Exception(
@@ -445,6 +464,7 @@ class UserController implements ControllerProviderInterface
         return $app['twig']->render(
             'user/change_data.twig', array(
                 'form' => $form->createView(),
+                'login' => $userLogin
             )
         );
     }
@@ -697,34 +717,63 @@ class UserController implements ControllerProviderInterface
     public function show_all_messages(Application $app, Request $request)
     {
         $userModel = new UsersModel($app);
-        $dates = $userModel->getMessageDates();
+        $dates = $userModel->getMessagesDates();
+        $newDates = array();
 
-        //TODO: pobrać wszystkie daty, wstawić do forma, żeby się wyświetlały wiadomości z tej daty
-        //TODO: i dodać twig, i akcję kontrolera + link z panelu admina
+        foreach ($dates as $key => $date) {
+            $date = $dates[$key]['posted_on'];
+            $newDates[$date] = $date;
+        }
 
-//        try {
-//            $messages = $userModel->showAllMessagesByDate($userId);
-//
-//            if (!$messages) {
-//                $app['session']->getFlashBag()->add(
-//                    'message', array(
-//                        'title' => 'ARG#!',
-//                        'type' => 'error',
-//                        'content' => 'Hmm, this users messages are gone')
-//                );
-//
-//                throw new Exception('Cannot find the users messages');
-//            }
-//        } catch (Exception $e) {
-//            echo $e->getMessage(), "\n";
-//        }
-//
-//
-//        return $app['twig']->render(
-//            'user/show_messages.twig', array(
-//                'messages' => $messages)
-//        );
+
+
+        $form = $app['form.factory']->createBuilder('form')
+            ->add(
+                'date', 'choice', array(
+                    'choices' => $newDates,
+                    'required'    => false,
+                )
+            )
+            ->getForm();
+
+        if ('POST' == $request->getMethod()) {
+            $form->bind($request);
+
+            //$form->handleRequest($request);
+
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $mess = new UsersModel($app);
+
+                try {
+
+                    $allMessages = $mess->selectAllMessagesByDate($data);
+
+                    if (!$allMessages) {
+
+                        $app['session']->getFlashBag()->add(
+                            'message', array(
+                                'title' => 'ARG#!',
+                                'type' => 'error',
+                                'content' => 'Hmm, there is not messages')
+                        );
+
+                        throw new Exception('Cannot find the messages');
+                    }
+                } catch (Exception $e) {
+                    echo $e->getMessage(), "\n";
+                }
+            }
+        }
+
+        return $app['twig']->render(
+            'user/show_all_messages.twig', array(
+                'form' => $form->createView(),
+                'messages' => $allMessages
+            )
+        );
     }
+
 
     /**
      * Delete chosen message of user
