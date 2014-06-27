@@ -86,10 +86,6 @@ class UserController implements ControllerProviderInterface
             '/show_all_messages', array(
                 $this, 'show_all_messages')
         )->bind('/user/show_all_messages');
-        $userController->match(
-            '/display_chosen_messages', array(
-                $this, 'display_chosen_messages')
-        )->bind('/user/display_chosen_messages');
 
         return $userController;
     }
@@ -374,7 +370,7 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'name', 'text', array(
                     'constraints' => array(
-                        new Assert\NotBlank(),
+                //        new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -382,7 +378,7 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'email', 'text', array(
                     'constraints' => array(
-                        new Assert\NotBlank(),
+            //            new Assert\NotBlank(),
                         new Assert\Email()
                     )
                 )
@@ -390,7 +386,7 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'login', 'text', array(
                     'constraints' => array(
-                        new Assert\NotBlank(),
+           //             new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -398,7 +394,7 @@ class UserController implements ControllerProviderInterface
             ->add(
                 'password', 'password', array(
                     'constraints' => array(
-                        new Assert\NotBlank(),
+            //            new Assert\NotBlank(),
                         new Assert\Length(array('min' =>5))
                     )
                 )
@@ -714,6 +710,11 @@ class UserController implements ControllerProviderInterface
         );
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @return mixed
+     */
     public function show_all_messages(Application $app, Request $request)
     {
         $userModel = new UsersModel($app);
@@ -780,6 +781,7 @@ class UserController implements ControllerProviderInterface
      *
      * @param Application $app
      * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function delete_message(Application $app, Request $request)
     {
@@ -831,6 +833,11 @@ class UserController implements ControllerProviderInterface
     }
 
 
+    /**
+     * @param $data
+     * @param $userExistingData
+     * @return mixed
+     */
     protected function compareData($data, $userExistingData)
     {
         $compare = array_diff($data, $userExistingData);
@@ -845,6 +852,10 @@ class UserController implements ControllerProviderInterface
     }
 
 
+    /**
+     * @param $data
+     * @return int
+     */
     protected function checkPassword($data)
     {
         if ($data['password'] != $data['password_repeat']) {

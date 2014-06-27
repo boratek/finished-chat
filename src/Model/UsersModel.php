@@ -13,6 +13,7 @@ use Silex\Application;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  *
@@ -95,6 +96,7 @@ class UsersModel
      */
     public function addMessage($login, $message)
     {
+
         $sql = 'INSERT INTO chat (chat_id, posted_on, login, message)
                 VALUES (0, NOW(), ?, ?)';
         return $this->_db->executeQuery($sql, array((string) $login, $message));
@@ -422,9 +424,6 @@ class UsersModel
      */
     public function getUserById($userId)
     {
-//        $sql = 'SELECT id, name, login, email
-//                FROM chat_users
-//                WHERE id = ? LIMIT 1';
 
         $sql = 'SELECT u.id, u.name, u.login, u.email, r.role_id
                 FROM chat_users u, chat_users_roles r
@@ -432,8 +431,6 @@ class UsersModel
                 AND u.id = r.user_id
                 LIMIT 1';
 
-//było fetchAssoc, ale jeżeli jest fetchAssoc to nei działa viewAction
-        //jeżeli jest fetchAll to trzeba używać póżniej np $login = $currentUser[0]['login']
         return $this->_db->fetchAll($sql, array((int) $userId));
     }
 
@@ -535,6 +532,10 @@ class UsersModel
         return $this->_db->fetchAll($sql);
     }
 
+    /**
+     * @param $data
+     * @return mixed
+     */
     public function selectAllMessagesByDate($data)
     {
         $sql = 'SELECT * FROM chat WHERE posted_on = ?';
