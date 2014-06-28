@@ -225,58 +225,65 @@ class UsersModel
      */
     public function registerUser($data, $app)
     {
-        try{
-            $password = $app['security.encoder.digest']->encodePassword(
-                $data['password'], ''
-            );
+        $checkData = $this->checkData($data['login'], $data['email']);
 
-            $startTransaction = "START TRANSACTION";
+        if ($checkData) {
 
-            $startingTheTransaction = $this->_db
-                ->executeQuery($startTransaction);
-
-            $insertIntoChatUsers =
-                'INSERT INTO chat_users (id, name, login, email, password)
-                 VALUES (0, ?, ?, ?, ?)';
-
-            $insertingUser = $this->_db
-                ->executeQuery(
-                    $insertIntoChatUsers, array(
-                    $data['name'],
-                    $data['login'],
-                    $data['email'],
-                    $password
-                    )
+            try{
+                $password = $app['security.encoder.digest']->encodePassword(
+                    $data['password'], ''
                 );
 
-            $selectLatestId = 'SELECT @user_id := max(id) FROM chat_users';
+                $startTransaction = "START TRANSACTION";
 
-            $findLatestUserId = $this->_db->executeQuery($selectLatestId);
+                $startingTheTransaction = $this->_db
+                    ->executeQuery($startTransaction);
 
-            $insertIntoUsersRoles =
-                'INSERT INTO chat_users_roles(id, user_id, role_id)
-                 VALUES (0, @user_id, 2)';
+                $insertIntoChatUsers =
+                    'INSERT INTO chat_users (id, name, login, email, password)
+                     VALUES (0, ?, ?, ?, ?)';
 
-            $insertingRole = $this->_db->executeQuery($insertIntoUsersRoles);
+                $insertingUser = $this->_db
+                    ->executeQuery(
+                        $insertIntoChatUsers, array(
+                        $data['name'],
+                        $data['login'],
+                        $data['email'],
+                        $password
+                        )
+                    );
 
-            $commitTransaction = "COMMIT";
+                $selectLatestId = 'SELECT @user_id := max(id) FROM chat_users';
 
-            $endOfTransaction = $this->_db->executeQuery($commitTransaction);
+                $findLatestUserId = $this->_db->executeQuery($selectLatestId);
 
-            if ((!$startingTheTransaction)
-                && (!$insertingUser)
-                && (!$findLatestUserId)
-                && (!$insertingRole)
-                && (!$endOfTransaction)) {
+                $insertIntoUsersRoles =
+                    'INSERT INTO chat_users_roles(id, user_id, role_id)
+                     VALUES (0, @user_id, 2)';
 
-                throw new Exception('Problem with registering user');
+                $insertingRole = $this->_db->executeQuery($insertIntoUsersRoles);
 
-                $result = 0;
-            } else {
-                $result = 1;
+                $commitTransaction = "COMMIT";
+
+                $endOfTransaction = $this->_db->executeQuery($commitTransaction);
+
+                if ((!$startingTheTransaction)
+                    && (!$insertingUser)
+                    && (!$findLatestUserId)
+                    && (!$insertingRole)
+                    && (!$endOfTransaction)) {
+
+                    throw new Exception('Problem with registering user');
+
+                    $result = 0;
+                } else {
+                    $result = 1;
+                }
+            } catch (Exception $e) {
+                echo $e->getMessage(); "\n";
             }
-        } catch (Exception $e) {
-            echo $e->getMessage(); "\n";
+        } else {
+            $result = 2;
         }
 
         return $result;
@@ -573,5 +580,60 @@ class UsersModel
         $sql = 'SELECT login FROM chat_users WHERE login = ? LIMIT 1';
 
         return $this->_db->fetchAll($sql, array((string) $login ));
+    }
+
+    /**
+     * check if login and email already exist
+     *
+     * @access public
+     * @param $login
+     * @param $email
+     * @return int
+     */
+    public function checkData($login, $email)
+    {
+        try {
+            $checkLogin = $this->checkLogin($login);
+            $checkEmail = $this->checkEmail($email);
+
+            if ($checkLogin) {
+                throw new \Exception('This login already exists');
+            } elseif ($checkEmail) {
+                throw new \Exception('This e-mail already exists');
+            } else {
+                return 1;
+            }
+
+        } catch (\Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+    }
+
+    /**
+     * check if email exists
+     *
+     * @access public
+     * @param $email
+     * @return mixed
+     */
+    public function checkEmail($email)
+    {
+        $sql = 'SELECT email FROM chat_users WHERE email = ? LIMIT 1';
+
+        return $this->_db->fetchAssoc($sql, array((string) $email));
+    }
+
+    /**
+     * function checking if login exists
+     *
+     * @access public
+     * @param $login
+     * @return mixed
+     */
+    public function checkLogin($login)
+    {
+        $sql = 'SELECT login FROM chat_users WHERE login = ? LIMIT 1';
+
+        return $this->_db->fetchAssoc($sql, array((string) $login));
     }
 }

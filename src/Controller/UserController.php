@@ -545,14 +545,12 @@ class UserController implements ControllerProviderInterface
                 $login = $form->get('login')->getData();
                 $newUser = new UsersModel($app);
 
-                $checkData = $this->checkData($data);
                 $checkPassword = $this->checkPassword($data);
 
                 if ($checkPassword) {
                     try {
                         $register = $newUser->registerUser($data, $app);
-
-                        if (!$register) {
+                        if ( 0 == $register) {
                             $app['session']->getFlashBag()->add(
                                 'message', array(
                                     'title' => 'ARGH#!',
@@ -567,6 +565,18 @@ class UserController implements ControllerProviderInterface
                                please try again later'
                            );
 
+                        } elseif (2 == $register) {
+                            $app['session']->getFlashBag()->add(
+                                'message', array(
+                                    'title' => 'ARGH#!',
+                                    'type' => 'error',
+                                    'content' =>
+                                        'We have these data! Give us some new!')
+                            );
+
+                            return $app->redirect(
+                                 $app['url_generator']->generate('/index'), 301
+                            );
                         } else {
                             // redirect to user profile
                             $app['session']->getFlashBag()->add(
