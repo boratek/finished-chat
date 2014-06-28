@@ -12,7 +12,7 @@ $app = new Silex\Application();
 
 //rejestracja kontrolerów
 $app->mount('/', new Controller\IndexController());
-$app->mount('/index/', new Controller\IndexController());
+//$app->mount('/index/', new Controller\IndexController());
 $app->mount('/user/', new Controller\UserController());
 $app->mount('/auth/', new Controller\AuthController());
 
@@ -156,6 +156,11 @@ $app->register(
             array('^/index.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
             array('^/auth/.+$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
             array('^/user/users/.+$', 'ROLE_ADMIN'),
+            array('^/user/users+$', 'ROLE_ADMIN'),
+            array('^/user/view/.+$', 'ROLE_ADMIN'),
+            array('^/user/change_role/.+$', 'ROLE_ADMIN'),
+            array('^/user/show_messages/.+$', 'ROLE_ADMIN'),
+            array('^/user/show_all_messages/.+$', 'ROLE_ADMIN'),
             array('^/user/profile/.+$', 'ROLE_USER')
         ),
         'security.role_hierarchy' => array(

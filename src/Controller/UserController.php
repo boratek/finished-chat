@@ -101,23 +101,6 @@ class UserController implements ControllerProviderInterface
     {
         $userModel = new UsersModel($app);
 
-        $existedUser = $userModel->checkIfUserExists($login);
-
-        if ($existedUser) {
-            $app['session']->getFlashBag()->add(
-                'message', array(
-                    'type' => 'error',
-                    'title' => 'ARG#!',
-                    'content' =>
-                        'Surprise, This user does not exist,
-                        please register first'
-                )
-            );
-
-            return $app->redirect('../../../../~11_krawczyk/chat/web/index');
-
-        } else {
-
             $user = $userModel->getUser($login);
 
             return $app['twig']->render(
@@ -126,7 +109,6 @@ class UserController implements ControllerProviderInterface
                     'login' => $login
                 )
             );
-        }
     }
 
     /**
@@ -147,27 +129,27 @@ class UserController implements ControllerProviderInterface
             ->add('message', 'text')
             ->getForm();
 
-        $form->bind($request);
+            $form->bind($request);
 
-        $data = $form->getData();
+            $data = $form->getData();
 
-        $message= $data['message'];
+            $message= $data['message'];
 
-        try {
-        $userModel = new UsersModel($app);
-        $result = $userModel->addMessage($login, $message);
+            try {
+            $userModel = new UsersModel($app);
+            $result = $userModel->addMessage($login, $message);
 
-            if (!$result) {
-                throw new Exception(
-                    'ARG,
-                    something went wrong with saving message.
-                    Please try later'
-                );
+                if (!$result) {
+                    throw new Exception(
+                        'ARG,
+                        something went wrong with saving message.
+                        Please try later'
+                    );
+                }
+            } catch (Exception $e) {
+                echo $e->getMessage(), "\n";
+                return $app->redirect('profile/' . $login);
             }
-        } catch (Exception $e) {
-            echo $e->getMessage(), "\n";
-            return $app->redirect('profile/' . $login);
-        }
 
         return $app['twig']->render(
             'user/chat.twig', array('form' => $form->createView(),

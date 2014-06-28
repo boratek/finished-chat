@@ -16,16 +16,17 @@
     {% endfor %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <a href="../../../chat/web/auth/logout">{{ 'Logout'|trans }}</a>
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
     {% else %}
         <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}
 
+    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
     <h1>{{ 'Choose messages'|trans }}</h1>
 
-    <a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
 
-    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="change_form">
+
+    <form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="show_all_form">
         {{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">{{ 'Pokaż'|trans }}</button>
     </form>
@@ -57,7 +58,7 @@
             </tbody>
         </table>
     {% else %}
-        <p>
+        <p id="messages">
             {{ 'Messages not found'|trans }}
         </p>
     {% endif %}

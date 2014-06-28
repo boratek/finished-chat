@@ -101,7 +101,7 @@ class AuthController implements ControllerProviderInterface
             )
         );
 
-        return $app->redirect($app['url_generator']->generate('/index'), 301);
+        return $app->redirect($app['url_generator']->generate('index'), 301);
     }
 
     /**
