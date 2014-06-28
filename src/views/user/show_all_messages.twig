@@ -16,7 +16,7 @@
     {% endfor %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+        <a href="../../../chat/web/auth/logout">{{ 'Logout'|trans }}</a>
     {% else %}
         <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
     {% endif %}

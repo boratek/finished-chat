@@ -33,7 +33,6 @@ $(document).ready(function(){
     console.log(form);
 
     form.submit(function(login){
-
         // fetch the data for the form
         var data = $('#testForm').serializeArray();
 

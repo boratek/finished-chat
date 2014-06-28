@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * UsersModel.php
+ * @author Bartosz Krawczyk
+ * @date 2014
+ */
+
 namespace Model;
 
 use Doctrine\DBAL\DBALException;
@@ -24,13 +30,19 @@ class UsersModel
 {
 
     /**
-     * database access objects
+     * database access object
      *
      * @access protected
      * @var $_db Doctrine\DBAL
-     * @var $_app Doctrine\DBAL
      */
     protected $_app;
+
+    /**
+     * database access object
+     *
+     * @access protected
+     * @var $_db Doctrine\DBAL
+     */
     protected $_db;
 
     /**
@@ -548,5 +560,18 @@ class UsersModel
         $sql = 'SELECT * FROM chat WHERE posted_on = ?';
 
         return $this->_db->fetchAll($sql, array($data['date']));
+    }
+
+    /**
+     * check if user already exists in db
+     *
+     * @param $login
+     * @return mixed
+     */
+    public function checkIfUserExists($login)
+    {
+        $sql = 'SELECT login FROM chat_users WHERE login = ? LIMIT 1';
+
+        return $this->_db->fetchAll($sql, array((string) $login ));
     }
 }

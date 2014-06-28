@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * IndexController.php
+ * @author Bartosz Krawczyk
+ * @date 2014
+ */
+
 namespace Controller;
 
 use Silex\Application;
@@ -18,7 +24,6 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
  * @uses Silex\ControllerProviderInterface
  * @uses Silex\Application
  */
-
 class IndexController implements ControllerProviderInterface
 {
 

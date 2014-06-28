@@ -1,9 +1,9 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: bartek
- * Date: 30.05.14
- * Time: 19:18
+ * UserController.php
+ * @author Bartosz Krawczyk
+ * @date 2014
  */
 
 namespace Controller;
@@ -27,7 +27,6 @@ use Model\UsersModel;
  * @uses Silex\ControllerProviderInterface
  * @uses Silex\Application
  */
-
 class UserController implements ControllerProviderInterface
 {
 
@@ -102,14 +101,32 @@ class UserController implements ControllerProviderInterface
     {
         $userModel = new UsersModel($app);
 
-        $user = $userModel->getUser($login);
+        $existedUser = $userModel->checkIfUserExists($login);
 
-        return $app['twig']->render(
-            'user/profile.twig', array(
-                'user' => $user,
-                'login' => $login
-            )
-        );
+        if ($existedUser) {
+            $app['session']->getFlashBag()->add(
+                'message', array(
+                    'type' => 'error',
+                    'title' => 'ARG#!',
+                    'content' =>
+                        'Surprise, This user does not exist,
+                        please register first'
+                )
+            );
+
+            return $app->redirect('../../../../~11_krawczyk/chat/web/index');
+
+        } else {
+
+            $user = $userModel->getUser($login);
+
+            return $app['twig']->render(
+                'user/profile.twig', array(
+                    'user' => $user,
+                    'login' => $login
+                )
+            );
+        }
     }
 
     /**
@@ -124,7 +141,9 @@ class UserController implements ControllerProviderInterface
     public function chat(Application $app, Request $request, $login)
     {
 
-        $form = $app['form.factory']->createBuilder('form', null, array('csrf_protection' => false))
+        $form = $app['form.factory']->createBuilder(
+            'form', null, array('csrf_protection' => false)
+        )
             ->add('message', 'text')
             ->getForm();
 
@@ -264,7 +283,9 @@ class UserController implements ControllerProviderInterface
                 )
             );
 
-            return $app->redirect($app['url_generator']->generate('/users/'), 301);
+            return $app->redirect(
+                $app['url_generator']->generate('/users/'), 301
+            );
         }
 
         $userCurrentRole = $currentUser[0]['role_id'];
@@ -308,7 +329,9 @@ class UserController implements ControllerProviderInterface
                         'content' => 'You have not changed user role')
                 );
 
-                return $app->redirect($app['url_generator']->generate('/users/'), 301);
+                return $app->redirect(
+                    $app['url_generator']->generate('/users/'), 301
+                );
             }
 
             try{
@@ -338,7 +361,9 @@ class UserController implements ControllerProviderInterface
                                 'content' => 'You have changed user role')
                         );
 
-                        return $app->redirect($app['url_generator']->generate('/users/'), 301);
+                        return $app->redirect(
+                            $app['url_generator']->generate('/users/'), 301
+                        );
                     }
             } catch (Exception $e) {
                 echo $e->getMessage(), "\n";
@@ -421,7 +446,9 @@ class UserController implements ControllerProviderInterface
                                     'You have changed your data correctly')
                         );
 
-                       return $app->redirect($app['url_generator']->generate('/login'), 301);
+                       return $app->redirect(
+                           $app['url_generator']->generate('/login'), 301
+                       );
 
                     } elseif (0 == $result) {
                         $app['session']->getFlashBag()->add(
@@ -484,7 +511,10 @@ class UserController implements ControllerProviderInterface
             )
         )
         ->add(
-            'email', 'text', array('label' => 'Email', 'constraints' => new Assert\Email())
+            'email', 'text', array(
+                    'label' => 'Email',
+                    'constraints' => new Assert\Email()
+                )
         )
         ->add(
             'login', 'text', array('label' => 'Login', 'constraints' => array(
@@ -602,7 +632,9 @@ class UserController implements ControllerProviderInterface
                 )
             );
 
-            return $app->redirect($app['url_generator']->generate('/users/'), 301);
+            return $app->redirect(
+                $app['url_generator']->generate('/users/'), 301
+            );
         }
 
         $userModel = new UsersModel($app);
