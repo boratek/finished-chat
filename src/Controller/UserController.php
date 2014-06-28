@@ -18,9 +18,9 @@ use Model\UsersModel;
 
 /**
  *
- * Class UsersController
+ * Class UserController
  *
- * @class UsersController
+ * @class UserController
  * @package Controller
  * @author EPI
  * @link epi.uj.edu.pl
@@ -91,7 +91,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * index action.
+     * index action
      *
      * @access public
      * @param \Silex\Application $app
@@ -113,7 +113,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * chat action.
+     * chat action
      *
      * @access public
      * @param \Silex\Application $app
@@ -157,7 +157,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * display action.
+     * display action
      *
      * @access public
      * @param \Silex\Application $app
@@ -190,7 +190,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * users action.
+     * users list action
      *
      * @access public
      * @param \Silex\Application $app
@@ -240,8 +240,9 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Change user role
+     * change user role
      *
+     * @access public
      * @param Application $app
      * @param Request $request
      * @return mixed
@@ -353,8 +354,9 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Change user data
+     * change user data
      *
+     * @access public
      * @param Application $app
      * @param Request $request
      * @return mixed
@@ -462,7 +464,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Register of user
+     * register of new user
      *
      * @access public
      * @param \Silex\Application $app
@@ -513,6 +515,7 @@ class UserController implements ControllerProviderInterface
                 $login = $form->get('login')->getData();
                 $newUser = new UsersModel($app);
 
+                $checkData = $this->checkData($data);
                 $checkPassword = $this->checkPassword($data);
 
                 if ($checkPassword) {
@@ -575,7 +578,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Delete user
+     * delete user
      *
      * @access public
      * @param \Silex\Application $app
@@ -635,7 +638,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * View user
+     * view particular user
      *
      * @access public
      * @param \Silex\Application $app
@@ -669,8 +672,9 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Show messages of user
+     * show messages of user
      *
+     * @access public
      * @param Application $app
      * @param Request $request
      * @return mixed
@@ -706,6 +710,9 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
+     * show all messages of user by date
+     *
+     * @access public
      * @param Application $app
      * @param Request $request
      * @return mixed
@@ -772,8 +779,9 @@ class UserController implements ControllerProviderInterface
 
 
     /**
-     * Delete chosen message of user
+     * delete chosen message of user
      *
+     * @access public
      * @param Application $app
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -814,7 +822,7 @@ class UserController implements ControllerProviderInterface
     }
 
     /**
-     * Check if user is logged
+     * check if user is logged
      *
      * @access protected
      * @param \Silex\Application $app
@@ -829,6 +837,9 @@ class UserController implements ControllerProviderInterface
 
 
     /**
+     * compare if existed data are equaly with data from form
+     *
+     * @access protected
      * @param $data
      * @param $userExistingData
      * @return mixed
@@ -846,8 +857,10 @@ class UserController implements ControllerProviderInterface
         return $data;
     }
 
-
     /**
+     * check if passwords are equally
+     *
+     * @access protected
      * @param $data
      * @return int
      */

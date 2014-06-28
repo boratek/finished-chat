@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bartek
- * Date: 30.05.14
- * Time: 19:19
- */
 
 namespace Model;
 
@@ -30,7 +24,7 @@ class UsersModel
 {
 
     /**
-     * Database access objects.
+     * database access objects
      *
      * @access protected
      * @var $_db Doctrine\DBAL
@@ -40,7 +34,7 @@ class UsersModel
     protected $_db;
 
     /**
-     * Class constructor.
+     * class constructor
      *
      * @access public
      * @param Application $app Silex application object
@@ -52,7 +46,7 @@ class UsersModel
     }
 
     /**
-     * Load user by login.
+     * load user by login
      *
      * @access public
      * @param $login
@@ -88,8 +82,9 @@ class UsersModel
     }
 
     /**
-     * Add new message
+     * add new message
      *
+     * @access public
      * @param $login
      * @param $message
      * @return mixed
@@ -103,8 +98,9 @@ class UsersModel
     }
 
     /**
-     * Display messages
+     * display messages
      *
+     * @access public
      * @return mixed
      */
     public function displayMessages()
@@ -114,7 +110,7 @@ class UsersModel
     }
 
     /**
-     * Get User by login.
+     * get user by login
      *
      * @access public
      * @param $login
@@ -129,7 +125,7 @@ class UsersModel
     }
 
     /**
-     * Get User roles.
+     * get user roles
      *
      * @access public
      * @param $userId
@@ -161,7 +157,7 @@ class UsersModel
     }
 
     /**
-     * Count Users pages.
+     * count users pages
      *
      * @access public
      * @param $limit
@@ -180,7 +176,7 @@ class UsersModel
     }
 
     /**
-     * Get User page.
+     * get user page
      *
      * @access public
      * @param $page
@@ -207,7 +203,7 @@ class UsersModel
     }
 
     /**
-     * register User.
+     * register user
      *
      * @access public
      * @param $data
@@ -275,7 +271,7 @@ class UsersModel
     }
 
     /**
-     * Get User.
+     * get user
      *
      * @access public
      * @param $login
@@ -293,6 +289,8 @@ class UsersModel
     }
 
     /**
+     * change user role
+     *
      * @param $userId
      * @param $data
      * @return mixed
@@ -330,8 +328,9 @@ class UsersModel
     }
 
     /**
-     * Change User Data
+     * change user data
      *
+     * @access public
      * @param $userLogin
      * @param $data
      * @param $app
@@ -362,8 +361,9 @@ class UsersModel
     }
 
     /**
-     * Prepare Query to change user data
+     * prepare sql query to change user data
      *
+     * @access public
      * @param $data
      * @param $id
      * @param $app
@@ -391,7 +391,7 @@ class UsersModel
     }
 
     /**
-     * view User
+     * view user
      *
      * @access public
      * @param $userId
@@ -415,7 +415,7 @@ class UsersModel
     }
 
     /**
-     * Get User by ID
+     * get user by id
      *
      * @access public
      * @param $userId
@@ -435,7 +435,7 @@ class UsersModel
     }
 
     /**
-     * Get User ID
+     * get user id
      *
      * @access public
      * @param $login
@@ -451,7 +451,7 @@ class UsersModel
 
 
     /**
-     * Delete User
+     * delete user
      *
      * @access public
      * @param $userId
@@ -493,8 +493,9 @@ class UsersModel
     }
 
     /**
-     * Show all messages of user
+     * show all messages of user
      *
+     * @access public
      * @param $userId
      * @return mixed
      */
@@ -510,7 +511,7 @@ class UsersModel
     }
 
     /**
-     * Delete chosen message
+     * delete chosen message
      *
      * @param $messId
      * @return mixed
@@ -523,6 +524,9 @@ class UsersModel
     }
 
     /**
+     * get dates of messages
+     *
+     * @access public
      * @return mixed
      */
     public function getMessagesDates()
@@ -533,6 +537,9 @@ class UsersModel
     }
 
     /**
+     * select all messages by date
+     *
+     * @access public
      * @param $data
      * @return mixed
      */

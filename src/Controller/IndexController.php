@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bartek
- * Date: 30.05.14
- * Time: 19:18
- */
 
 namespace Controller;
 
@@ -29,7 +23,7 @@ class IndexController implements ControllerProviderInterface
 {
 
     /**
-     * connect.
+     * connect
      *
      * @access public
      * @param \Silex\Application $app
@@ -39,12 +33,12 @@ class IndexController implements ControllerProviderInterface
     public function connect(Application $app)
     {
         $indexController = $app['controllers_factory'];
-        $indexController->get('/', array($this, 'index'));//->bind('/index');
+        $indexController->get('/', array($this, 'index'))->bind('/index');
         return $indexController;
     }
 
     /**
-     * index action.
+     * index action
      *
      * @access public
      * @param \Silex\Application $app
