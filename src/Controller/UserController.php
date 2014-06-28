@@ -629,35 +629,75 @@ class UserController implements ControllerProviderInterface
             );
         }
 
-        $userModel = new UsersModel($app);
+        $form = $app['form.factory']->createBuilder(
+            'form', null, array('csrf_protection' => false)
+        )
+            ->add(
+                'delete', 'choice', array(
+                'choices' => array(1 => 'Tak', 0 => 'Nie'),
+                'required'    => false,
+                )
+            )
+            ->getForm();
 
-        try {
+        $form->bind($request);
+        $login = $currentUser[0]['login'];
 
-            $delete = $userModel->deleteUser($userId);
+        if ('POST' == $request->getMethod()) {
+            if ($form->isValid()) {
 
-            if (0 == $delete) {
-                $app['session']->getFlashBag()->add(
-                    'message', array(
-                        'title' => 'ARG#!',
-                        'type' => 'error',
-                        'content' => 'User is not deleted')
-                );
+                $data = $form->getData();
 
-                throw new Exception('Cannot find the user');
-            } else {
-                  $app['session']->getFlashBag()->add(
-                      'message', array(
-                        'title' => 'OK',
-                        'type' => 'success',
-                        'content' => 'User has been succesfully deleted')
-                  );
+                if ( 1 == $data['delete']) {
+
+                    $userModel = new UsersModel($app);
+
+                    try {
+
+                        $delete = $userModel->deleteUser($userId);
+
+                        if (0 == $delete) {
+                            $app['session']->getFlashBag()->add(
+                                'message', array(
+                                    'title' => 'ARG#!',
+                                    'type' => 'error',
+                                    'content' => 'User is not deleted')
+                            );
+
+                            throw new Exception('Cannot find the user');
+                        } else {
+                            $app['session']->getFlashBag()->add(
+                                'message', array(
+                                    'title' => 'OK',
+                                    'type' => 'success',
+                                    'content' => 'User has been succesfully deleted')
+                            );
+
+                            return $app->redirect($app['url_generator']->generate('/users/'), 301);
+                        }
+
+                    } catch (Exception $e) {
+                        echo $e->getMessage(), "\n";
+                    }
+                } else {
+                    $app['session']->getFlashBag()->add(
+                        'message', array(
+                            'title' => 'HEY',
+                            'type' => 'info',
+                            'content' => 'User is not deleted')
+                    );
+
+                    return $app->redirect($app['url_generator']->generate('/users/'), 301);
+                }
             }
-
-        } catch (Exception $e) {
-            echo $e->getMessage(), "\n";
         }
 
-        return $app->redirect($app['url_generator']->generate('/users/'), 301);
+        return $app['twig']->render(
+            'user/delete.twig', array(
+                'form' => $form->createView(),
+                'login' => $login
+            )
+        );
 
     }
 

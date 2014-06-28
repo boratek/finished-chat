@@ -1,0 +1,34 @@
+{% extends 'layout.twig' %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block title %}Chat - Admin - {{ 'Delete user'|trans }}{% endblock %}
+
+{% block content %}
+
+    {% for flashbag in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-{{ flashbag.type }}">
+            {{ flashbag.title }}
+            {{ flashbag.content|trans }}
+        </div>
+    {% endfor %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('/logout') }}">{{ 'Logout'|trans }}</a>
+    {% else %}
+        <a href="{{ path('/login') }}">{{ 'Login'|trans }}</a>
+    {% endif %}
+
+<a href="{{url('/users/')}}">{{ 'Return'|trans }}</a>
+<h1>{{ 'Delete user'|trans }}</h1>
+    <p>Jesteś pewien, że chcesz usunąć użytkownika:</p>
+<h2>{{ login }}</h2>
+
+<form action="" method="post" novalidate {{ form_enctype(form) }} class="form-inline well span3" id="delete_user_form">
+    {{ form_widget(form) }}
+    <button type="submit" class="btn btn-primary">{{ 'Usuń'|trans }}</button>
+</form>
+
+{% endblock %}
